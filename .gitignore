@@ -1,0 +1,12 @@
+csv-manager.iml
+modules.xml
+php.xml
+vcs.xml
+codeception.xml
+phpspec.xml
+vendor
+composer.lock
+resources/test-csv/*
+!resources/test-csv/.gitkeep
+.phpunit.result.cache
+php-test-framework.xml
