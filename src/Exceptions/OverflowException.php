@@ -1,8 +1,8 @@
 <?php
 
-namespace src\Exceptions;
+namespace CsvManager\src\Exceptions;
 use Exception;
-use src\Core\LanguageManager;
+use CsvManager\src\Core\LanguageManager;
 use Throwable;
 
 class OverflowException extends Exception

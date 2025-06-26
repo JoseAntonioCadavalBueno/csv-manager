@@ -1,10 +1,10 @@
 <?php
 
-namespace src\Contracts;
+namespace CsvManager\src\Contracts;
 
-use src\Exceptions\CorruptedFileException;
-use src\Exceptions\NotFoundFileException;
-use src\Exceptions\OverflowException;
+use CsvManager\src\Exceptions\CorruptedFileException;
+use CsvManager\src\Exceptions\NotFoundFileException;
+use CsvManager\src\Exceptions\OverflowException;
 
 interface ICsv
 {

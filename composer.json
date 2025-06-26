@@ -18,7 +18,9 @@
   },
   "autoload": {
     "psr-4": {
-      "src\\" : "src/"
+      "CsvManager\\src\\": "src/",
+      "CsvManager\\config\\": "config/",
+      "CsvManager\\locales\\": "locales/"
     }
   },
   "autoload-dev": {
@@ -26,6 +28,8 @@
       "tests\\": "tests/"
     }
   },
+
+  "bin": ["bin/generate-config"],
 
   "scripts": {
     "test": "phpunit --configuration phpunit.xml"

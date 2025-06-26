@@ -1,8 +1,8 @@
 <?php
 
-namespace src\Integrations;
+namespace CsvManager\src\Integrations;
 
-use src\Core\BaseCsv;
+use CsvManager\src\Core\BaseCsv;
 use Symfony\Component\Filesystem\Filesystem;
 
 class SymfonyCsv extends BaseCsv
