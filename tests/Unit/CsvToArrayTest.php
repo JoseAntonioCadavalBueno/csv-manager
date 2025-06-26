@@ -3,11 +3,11 @@
 namespace tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use src\Core\LanguageManager;
-use src\Csv;
-use src\Exceptions\CorruptedFileException;
-use src\Exceptions\NotFoundFileException;
-use src\Exceptions\OverflowException;
+use CsvManager\src\Core\LanguageManager;
+use CsvManager\src\Csv;
+use CsvManager\src\Exceptions\CorruptedFileException;
+use CsvManager\src\Exceptions\NotFoundFileException;
+use CsvManager\src\Exceptions\OverflowException;
 
 class CsvToArrayTest extends TestCase
 {

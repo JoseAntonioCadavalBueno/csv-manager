@@ -1,13 +1,20 @@
 <?php
 
-namespace src\Core;
+namespace CsvManager\src\Core;
 
 class LanguageManager
 {
-    const LOCALE_PATH       = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'locales' . DIRECTORY_SEPARATOR . '%s.php';
-    const DEFAULT_LANGUAGE  = 'en';
+    const BASE_PATH = __DIR__ . DIRECTORY_SEPARATOR . '..'
+        . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
 
-    private static string $languageCode = 'en';
+    const LOCALE_PATH = self::BASE_PATH . 'locales'
+        . DIRECTORY_SEPARATOR . '%s.php';
+
+    const DEFAULT_CONFIG_PATH   = self::BASE_PATH . 'config' . DIRECTORY_SEPARATOR . 'csv-manager.php';
+    const CUSTOM_CONFIG_PATH    = self::BASE_PATH . '..'
+        . DIRECTORY_SEPARATOR . '..'
+        . DIRECTORY_SEPARATOR . 'config'
+        . DIRECTORY_SEPARATOR . 'csv-manager.php';
 
     /* **************** */
     /* PUBLIC FUNCTIONS */
@@ -21,15 +28,13 @@ class LanguageManager
      */
     public static function getMessage(string $key): string
     {
-        // Set the language.
-        $langFile = sprintf(self::LOCALE_PATH, self::$languageCode);
+        $config = file_exists(self::CUSTOM_CONFIG_PATH)
+            ? require self::CUSTOM_CONFIG_PATH
+            : require self::DEFAULT_CONFIG_PATH;
 
-        // If the locale file doesn't exist set the default locale.
-        if (!file_exists($langFile)) {
-            $langFile = sprintf(self::LOCALE_PATH, self::DEFAULT_LANGUAGE);
-        }
-
+        $langFile = sprintf(self::LOCALE_PATH, $config['language']);
         $messages = include $langFile;
+
         return self::getNestedMessage($messages, $key);
     }
 
