@@ -1,14 +1,14 @@
 <?php
 
-namespace CsvManager\src;
+namespace CsvManager;
 
-use CsvManager\src\Exceptions\CorruptedFileException;
-use CsvManager\src\Exceptions\NotFoundFileException;
-use CsvManager\src\Exceptions\OverflowException;
-use CsvManager\src\Integrations\LaravelCsv;
-use CsvManager\src\Integrations\NativeCsv;
-use CsvManager\src\Contracts\ICsv;
-use CsvManager\src\Integrations\SymfonyCsv;
+use CsvManager\Exceptions\CorruptedFileException;
+use CsvManager\Exceptions\NotFoundFileException;
+use CsvManager\Exceptions\OverflowException;
+use CsvManager\Integrations\LaravelCsv;
+use CsvManager\Integrations\NativeCsv;
+use CsvManager\Contracts\ICsv;
+use CsvManager\Integrations\SymfonyCsv;
 
 class Csv
 {

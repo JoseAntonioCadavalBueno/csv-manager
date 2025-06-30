@@ -3,7 +3,7 @@
 namespace tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use CsvManager\src\Csv;
+use CsvManager\Csv;
 
 class CsvFromArrayNativeTest extends TestCase
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace CsvManager\src\Contracts;
+namespace CsvManager\Contracts;
 
 use CsvManager\src\Exceptions\CorruptedFileException;
 use CsvManager\src\Exceptions\NotFoundFileException;

@@ -1,8 +1,8 @@
 <?php
 
-namespace CsvManager\src\Integrations;
+namespace CsvManager\Integrations;
 
-use CsvManager\src\Core\BaseCsv;
+use CsvManager\Core\BaseCsv;
 use Illuminate\Support\Facades\Storage;
 
 class LaravelCsv extends BaseCsv
