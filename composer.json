@@ -18,9 +18,8 @@
   },
   "autoload": {
     "psr-4": {
-      "CsvManager\\src\\": "src/",
-      "CsvManager\\config\\": "config/",
-      "CsvManager\\locales\\": "locales/"
+      "CsvManager\\": "src/",
+      "CsvManager\\config\\": "config/"
     }
   },
   "autoload-dev": {

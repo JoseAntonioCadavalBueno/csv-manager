@@ -1,12 +1,12 @@
 <?php
 
-namespace CsvManager\src\Integrations;
+namespace CsvManager\Integrations;
 
 use LogicException;
-use CsvManager\src\Core\BaseCsv;
-use CsvManager\src\Core\LanguageManager;
-use CsvManager\src\Exceptions\CorruptedFileException;
-use CsvManager\src\Exceptions\NotFoundFileException;
+use CsvManager\Core\BaseCsv;
+use CsvManager\Core\LanguageManager;
+use CsvManager\Exceptions\CorruptedFileException;
+use CsvManager\Exceptions\NotFoundFileException;
 
 class NativeCsv extends BaseCsv
 {

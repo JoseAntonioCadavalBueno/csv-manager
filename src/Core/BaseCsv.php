@@ -1,11 +1,11 @@
 <?php
 
-namespace CsvManager\src\Core;
+namespace CsvManager\Core;
 
-use CsvManager\src\Exceptions\CorruptedFileException;
-use CsvManager\src\Exceptions\NotFoundFileException;
-use CsvManager\src\Exceptions\OverflowException;
-use CsvManager\src\Contracts\ICsv;
+use CsvManager\Exceptions\CorruptedFileException;
+use CsvManager\Exceptions\NotFoundFileException;
+use CsvManager\Exceptions\OverflowException;
+use CsvManager\Contracts\ICsv;
 use Throwable;
 
 abstract class BaseCsv implements ICsv

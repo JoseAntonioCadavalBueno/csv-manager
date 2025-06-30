@@ -1,6 +1,6 @@
 <?php
 
-namespace CsvManager\src\Core;
+namespace CsvManager\Core;
 
 class LanguageManager
 {

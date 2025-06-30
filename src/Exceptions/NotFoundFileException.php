@@ -1,8 +1,8 @@
 <?php
 
-namespace CsvManager\src\Exceptions;
+namespace CsvManager\Exceptions;
 use Exception;
-use CsvManager\src\Core\LanguageManager;
+use CsvManager\Core\LanguageManager;
 use Throwable;
 
 class NotFoundFileException extends Exception
