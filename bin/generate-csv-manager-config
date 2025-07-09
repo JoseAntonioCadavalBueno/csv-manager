@@ -33,4 +33,4 @@ if (!is_dir(DEFAULT_DESTINATION_PATH))
     }
 }
 
-Config::handle(realpath(CSV_SOURCE_PATH), $argv[1] ?? realpath(DEFAULT_DESTINATION_PATH . 'csv-manager.php'));
+Config::handle(CSV_SOURCE_PATH,DEFAULT_DESTINATION_PATH . 'csv-manager.php');

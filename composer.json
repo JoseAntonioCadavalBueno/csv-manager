@@ -1,6 +1,6 @@
 {
   "name": "atomsk/csv-manager",
-  "version": "v0.1.4",
+  "version": "v0.1.5",
   "description": "PHP library for efficient management of large CSV files.",
   "type": "library",
   "license": "MIT",
@@ -28,7 +28,7 @@
     }
   },
 
-  "bin": ["bin/generate-config"],
+  "bin": ["bin/generate-csv-manager-config"],
 
   "scripts": {
     "test": "phpunit --configuration phpunit.xml"
