@@ -1,0 +1,36 @@
+#!/usr/bin/env php
+<?php
+
+define('CSV_BASE_PATH', dirname(__DIR__, 3));
+define(
+    'CSV_SOURCE_PATH',
+    CSV_BASE_PATH . DIRECTORY_SEPARATOR . 'atomsk'
+    . DIRECTORY_SEPARATOR . 'csv-manager'
+    . DIRECTORY_SEPARATOR . 'config'
+    . DIRECTORY_SEPARATOR . 'csv-manager.php'
+);
+define(
+    'DEFAULT_DESTINATION_PATH',
+    dirname(CSV_BASE_PATH, 1)
+    . DIRECTORY_SEPARATOR . 'config'
+    . DIRECTORY_SEPARATOR
+);
+
+require_once CSV_BASE_PATH . DIRECTORY_SEPARATOR . 'autoload.php';
+require_once CSV_BASE_PATH . DIRECTORY_SEPARATOR . 'atomsk'
+    . DIRECTORY_SEPARATOR . 'csv-manager'
+    . DIRECTORY_SEPARATOR . 'config'
+    . DIRECTORY_SEPARATOR . 'Config.php';
+
+use CsvManager\config\Config;
+
+if (!is_dir(DEFAULT_DESTINATION_PATH))
+{
+    if (!mkdir(DEFAULT_DESTINATION_PATH, 0755, true))
+    {
+        echo "ERROR: Could not create directory " . DEFAULT_DESTINATION_PATH . "\n";
+        exit(1);
+    }
+}
+
+Config::handle(CSV_SOURCE_PATH,DEFAULT_DESTINATION_PATH . 'csv-manager.php');

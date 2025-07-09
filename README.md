@@ -13,7 +13,7 @@ You can generate a customized file depending on the environment.
 ### 🐘 PHP
 You just need to run the following command:
 ```bash
-    ./vendor/bin/generate-config
+    ./vendor/bin/generate-csv-manager-config
 ```
 
 ## 🛠️ Example
