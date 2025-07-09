@@ -1,6 +1,6 @@
 {
   "name": "atomsk/csv-manager",
-  "version": "v0.1.2",
+  "version": "v0.1.3",
   "description": "PHP library for efficient management of large CSV files.",
   "type": "library",
   "license": "MIT",
