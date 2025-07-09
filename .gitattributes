@@ -1,5 +1,8 @@
 /tests export-ignore
 /docker export-ignore
-/phpunit.xml export-ingore
+/phpunit.xml export-ignore
 /.gitlab-ci.yml export-ignore
 /.gitignore export-ignore
+/.gitattributes
+/resources export-ignore
+/.idea export-ignore
