@@ -1,0 +1,37 @@
+stages:
+  - test
+
+test-php-8-0:
+  stage: test
+  image: hub.bigestionlab.com/docker-images/atomsk-php:php-8.0
+  script:
+    - 'composer install'
+    - 'composer test'
+
+test-php-8-1:
+  stage: test
+  image: hub.bigestionlab.com/docker-images/atomsk-php:php-8.1
+  script:
+    - 'composer install'
+    - 'composer test'
+
+test-php-8-2:
+  stage: test
+  image: hub.bigestionlab.com/docker-images/atomsk-php:php-8.2
+  script:
+    - 'composer install'
+    - 'composer test'
+
+test-php-8-3:
+  stage: test
+  image: hub.bigestionlab.com/docker-images/atomsk-php:php-8.3
+  script:
+    - 'composer install'
+    - 'composer test'
+
+test-php-8-4:
+  stage: test
+  image: hub.bigestionlab.com/docker-images/atomsk-php:php-8.4
+  script:
+    - 'composer install'
+    - 'composer test'

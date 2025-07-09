@@ -1,0 +1,36 @@
+{
+  "name": "atomsk/csv-manager",
+  "version": "v1.0.0",
+  "description": "PHP library for efficient management of large CSV files.",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "José Antonio Cadaval Bueno",
+      "email": "jcadavalbueno@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=8.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "CsvManager\\": "src/",
+      "CsvManager\\config\\": "config/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "tests\\": "tests/"
+    }
+  },
+
+  "bin": ["bin/generate-csv-manager-config"],
+
+  "scripts": {
+    "test": "phpunit --configuration phpunit.xml"
+  }
+}
