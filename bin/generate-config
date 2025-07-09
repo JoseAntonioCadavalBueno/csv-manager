@@ -16,7 +16,7 @@ define(
     . DIRECTORY_SEPARATOR
 );
 
-require_once CSV_BASE_PATH . 'autoload.php';
+require_once CSV_BASE_PATH . DIRECTORY_SEPARATOR . 'autoload.php';
 require_once CSV_BASE_PATH . DIRECTORY_SEPARATOR . 'atomsk'
     . DIRECTORY_SEPARATOR . 'csv-manager'
     . DIRECTORY_SEPARATOR . 'config'
