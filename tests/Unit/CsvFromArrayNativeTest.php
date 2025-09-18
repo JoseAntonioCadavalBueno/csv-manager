@@ -2,8 +2,8 @@
 
 namespace tests\Unit;
 
+use CsvManager\Facades\Csv;
 use PHPUnit\Framework\TestCase;
-use CsvManager\Csv;
 
 class CsvFromArrayNativeTest extends TestCase
 {
@@ -41,6 +41,17 @@ class CsvFromArrayNativeTest extends TestCase
     public function test_generate_a_csv_file_from_array_in_native_php()
     {
         $result = Csv::fromArray(self::RAW_DATA, self::CSV_TEST_PATH . 'native_php.csv');
+        $this->assertFileExists($result);
+    }
+
+    /**
+     * Unitary test that generate a txt file from array in native php
+     *
+     * @test
+     */
+    public function test_generate_a_txt_file_from_array_in_native_php()
+    {
+        $result = Csv::fromArray(self::RAW_DATA, self::CSV_TEST_PATH . 'native_php.txt');
         $this->assertFileExists($result);
     }
 }
