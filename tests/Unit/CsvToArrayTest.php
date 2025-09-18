@@ -2,18 +2,21 @@
 
 namespace tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use CsvManager\Core\LanguageManager;
-use CsvManager\Csv;
 use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
 use CsvManager\Exceptions\OverflowException;
+use CsvManager\Facades\Csv;
+use PHPUnit\Framework\TestCase;
 
 class CsvToArrayTest extends TestCase
 {
     const CSV_TEST_PATH     = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'test-csv' . DIRECTORY_SEPARATOR;
     const BIGGER_CSV   = self::CSV_TEST_PATH . 'biggerTest.csv';
+    const BIGGER_TXT   = self::CSV_TEST_PATH . 'biggerTest.txt';
     const SMALLER_CSV  = self::CSV_TEST_PATH . 'smallerTest.csv';
+    const SMALLER_TXT  = self::CSV_TEST_PATH . 'smallerTest.txt';
+
     const MALICIOUS_INPUTS  = [
         "test.csv; rm -rf /",
         "`ls -la`",
@@ -66,9 +69,11 @@ class CsvToArrayTest extends TestCase
 
     public function setUp(): void
     {
-        // Generate csv files for tests.
+        // Generate csv and txt files for tests.
         $this->generateCsv(self::SMALLER_CSV, 10, 1);
+        $this->generateCsv(self::SMALLER_TXT, 10, 1);
         $this->generateCsv(self::BIGGER_CSV, 500000, 10);
+        $this->generateCsv(self::BIGGER_TXT, 500000, 10);
     }
 
     public function tearDown(): void
@@ -95,6 +100,20 @@ class CsvToArrayTest extends TestCase
     public function test_processes_csv_of_smaller_size_than_memory_limit_when_function_is_null()
     {
         $result = Csv::toArray(realpath(self::SMALLER_CSV));
+
+        $this->assertNotTrue($result);
+        $this->assertIsArray($result);
+        $this->assertCount(11, $result);
+    }
+
+    /**
+     * Unitary test that processes txt of smaller size than memory limit when function is null.
+     *
+     * @test
+     */
+    public function test_processes_txt_of_smaller_size_than_memory_limit_when_function_is_null()
+    {
+        $result = Csv::toArray(realpath(self::SMALLER_TXT));
 
         $this->assertNotTrue($result);
         $this->assertIsArray($result);
@@ -149,6 +168,21 @@ class CsvToArrayTest extends TestCase
     }
 
     /**
+     * Unitary test that processes txt of bigger size than memory limit when function is null.
+     *
+     * @test
+     */
+    public function test_processes_txt_of_bigger_size_than_memory_limit_when_function_is_null()
+    {
+        try {
+            $result = Csv::toArray(realpath(self::BIGGER_TXT));
+        } catch (OverflowException $exception) {
+            $this->assertEquals(500, $exception->getCode());
+            $this->assertEquals(LanguageManager::getMessage('errors.overflow'), $exception->getMessage());
+        }
+    }
+
+    /**
      * Unitary test that processes csv of bigger size than memory limit when function is not null.
      *
      * @test
@@ -167,14 +201,32 @@ class CsvToArrayTest extends TestCase
     }
 
     /**
+     * Unitary test that processes txt of bigger size than memory limit when function is not null.
+     *
+     * @test
+     */
+    public function test_processes_txt_of_bigger_size_than_memory_limit_when_function_is_not_null()
+    {
+        $result = Csv::toArray(
+            realpath(self::BIGGER_TXT),
+            false,
+            function (array $data) {
+                $this->assertCount(6, $data);
+            });
+
+        $this->assertIsNotArray($result);
+        $this->assertTrue($result);
+    }
+
+    /**
      * Unitary test that try to process a not valid csv file.
      *
      * @test
      */
-    public function test_csv_file_is_not_valid()
+    public function test_csv_file_is_not_found()
     {
         try {
-            $result = Csv::toArray(realpath(self::CSV_TEST_PATH) . DIRECTORY_SEPARATOR . 'LollipopStreetFakeNumber');
+            $result = Csv::toArray(realpath(self::CSV_TEST_PATH) . DIRECTORY_SEPARATOR . 'LollipopStreetFakeNumber.csv');
         } catch (NotFoundFileException $exception) {
             $this->assertEquals(404, $exception->getCode());
             $this->assertEquals(LanguageManager::getMessage('errors.not_found'), $exception->getMessage());
@@ -193,7 +245,13 @@ class CsvToArrayTest extends TestCase
                 $result = Csv::toArray(realpath(self::CSV_TEST_PATH) . DIRECTORY_SEPARATOR . $maliciousInput);
             } catch (CorruptedFileException $exception) {
                 $this->assertEquals(415, $exception->getCode());
-                $this->assertEquals(LanguageManager::getMessage('errors.corrupt'), $exception->getMessage());
+                if($maliciousInput === 'php://input')
+                {
+                    $this->assertEquals(LanguageManager::getMessage('errors.corrupt_2'), $exception->getMessage());
+                } else
+                {
+                    $this->assertEquals(LanguageManager::getMessage('errors.corrupt'), $exception->getMessage());
+                }
             }
         }
     }

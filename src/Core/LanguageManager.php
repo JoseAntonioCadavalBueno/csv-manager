@@ -10,12 +10,6 @@ class LanguageManager
     const LOCALE_PATH = self::BASE_PATH . 'locales'
         . DIRECTORY_SEPARATOR . '%s.php';
 
-    const DEFAULT_CONFIG_PATH   = self::BASE_PATH . 'config' . DIRECTORY_SEPARATOR . 'csv-manager.php';
-    const CUSTOM_CONFIG_PATH    = self::BASE_PATH . '..'
-        . DIRECTORY_SEPARATOR . '..'
-        . DIRECTORY_SEPARATOR . 'config'
-        . DIRECTORY_SEPARATOR . 'csv-manager.php';
-
     /* **************** */
     /* PUBLIC FUNCTIONS */
     /* **************** */
@@ -28,11 +22,9 @@ class LanguageManager
      */
     public static function getMessage(string $key): string
     {
-        $config = file_exists(self::CUSTOM_CONFIG_PATH)
-            ? require self::CUSTOM_CONFIG_PATH
-            : require self::DEFAULT_CONFIG_PATH;
+        $language = ConfigManager::get('language', 'en');
 
-        $langFile = sprintf(self::LOCALE_PATH, $config['language']);
+        $langFile = sprintf(self::LOCALE_PATH, $language);
         $messages = include $langFile;
 
         return self::getNestedMessage($messages, $key);
