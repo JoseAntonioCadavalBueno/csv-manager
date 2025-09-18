@@ -14,7 +14,10 @@ abstract class BaseCsv implements ICsv
     const DEFAULT_CHUNK_SIZE    = 50000;
     const DEFAULT_MEMORY_LIMIT  = 134217728;
     const CSV_EXTENSION = 'csv';
-    const SANITIZE_REGEX = '/[^a-zA-Z0-9\/\.\-_]/';
+    const TXT_EXTENSION = 'txt';
+
+    const ALLOWED_EXTENSIONS = [ self::CSV_EXTENSION, self::TXT_EXTENSION ];
+    const SANITIZE_REGEX = '/[^a-zA-Z0-9\/\\\\:\.\-_]/';
 
     /** @var int $freeMemory */
     protected static int $freeMemory;
@@ -205,9 +208,13 @@ abstract class BaseCsv implements ICsv
 
         // Extract the extension's file.
         $extension = pathinfo($satinizedFilePath, PATHINFO_EXTENSION);
+        $allowedExtensions = ConfigManager::get('allowed_extensions', self::ALLOWED_EXTENSIONS);
+        $allowedExtensions = is_string($allowedExtensions)
+            ? explode(',', $allowedExtensions)
+            : $allowedExtensions;
 
-        // If the extension's file is different like csv, throw a CorruptedFileException.
-        if (!empty($extension) && strtolower($extension) !== self::CSV_EXTENSION)
+        // If the extension's file is not allowed extension, throw a CorruptedFileException.
+        if (empty($extension) || !in_array(strtolower($extension), $allowedExtensions))
         {
             throw new CorruptedFileException(LanguageManager::getMessage('errors.corrupt_2'));
         }
@@ -234,13 +241,32 @@ abstract class BaseCsv implements ICsv
     /**
      * Function that generate a fileName.
      *
-     * @param string|null $filename
-     * @return string
+     * @param   string|null $filename
+     * @return  string
+     * @throws  CorruptedFileException
      */
     protected static function generateFileName(?string $filename = null): string
     {
-        return !is_null($filename)
-            ? self::sanitizeFileName($filename). '.' . self::CSV_EXTENSION
-            : self::CSV_EXTENSION . '_' . uniqid() . '.' . self::CSV_EXTENSION;
+        if (!is_null($filename))
+        {
+            if (str_contains($filename, '.'))
+            {
+                $extension = pathinfo($filename);
+                $allowedExtensions = ConfigManager::get('allowed_extensions', self::ALLOWED_EXTENSIONS);
+                $allowedExtensions = is_string($allowedExtensions)
+                    ? explode(',', $allowedExtensions)
+                    : $allowedExtensions;
+                if (!in_array($extension, $allowedExtensions))
+                {
+                    throw new CorruptedFileException(LanguageManager::getMessage('errors.corrupt_2'));
+                }
+            }
+
+            $filename = $filename . '.' . self::CSV_EXTENSION;
+        } else
+        {
+            $filename = self::CSV_EXTENSION . '_' . uniqid() . '.' . self::CSV_EXTENSION;
+        }
+        return $filename;
     }
 }

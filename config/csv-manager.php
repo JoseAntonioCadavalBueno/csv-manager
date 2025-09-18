@@ -6,5 +6,12 @@ return [
     | --------------------------------------------------------------
     |
     */
-    'language' => 'en'
+    'language' => 'en',
+
+    /*
+    | Define the allowed extensions for files.
+    | --------------------------------------------------------------
+    |
+    */
+    'allowed_extensions' => 'csv,txt'
 ];

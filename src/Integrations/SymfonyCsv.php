@@ -3,6 +3,7 @@
 namespace CsvManager\Integrations;
 
 use CsvManager\Core\BaseCsv;
+use CsvManager\Exceptions\CorruptedFileException;
 use Symfony\Component\Filesystem\Filesystem;
 
 class SymfonyCsv extends BaseCsv
@@ -12,12 +13,13 @@ class SymfonyCsv extends BaseCsv
     /**
      * A function that generates a CSV file from an array.
      *
-     * @param array         $data
-     * @param string|null   $filename
-     * @param string        $delimiter
-     * @param string        $enclosure
-     * @param string|null   $customPath
+     * @param array $data
+     * @param string|null $filename
+     * @param string $delimiter
+     * @param string $enclosure
+     * @param string|null $customPath
      * @return string
+     * @throws CorruptedFileException
      */
     public static function fromArray(
         array   $data,

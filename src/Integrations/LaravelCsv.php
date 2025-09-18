@@ -3,6 +3,7 @@
 namespace CsvManager\Integrations;
 
 use CsvManager\Core\BaseCsv;
+use CsvManager\Exceptions\CorruptedFileException;
 use Illuminate\Support\Facades\Storage;
 
 class LaravelCsv extends BaseCsv
@@ -13,12 +14,13 @@ class LaravelCsv extends BaseCsv
     /**
      * A function that generates a CSV file from an array.
      *
-     * @param array         $data
-     * @param string|null   $filename
-     * @param string        $delimiter
-     * @param string        $enclosure
-     * @param string|null   $customPath
+     * @param array $data
+     * @param string|null $filename
+     * @param string $delimiter
+     * @param string $enclosure
+     * @param string|null $customPath
      * @return string
+     * @throws CorruptedFileException
      */
     public static function fromArray(
         array   $data,
