@@ -1,13 +1,13 @@
 <?php
 
-namespace CsvManager;
+namespace CsvManager\Facades;
 
+use CsvManager\Contracts\ICsv;
 use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
 use CsvManager\Exceptions\OverflowException;
 use CsvManager\Integrations\LaravelCsv;
 use CsvManager\Integrations\NativeCsv;
-use CsvManager\Contracts\ICsv;
 use CsvManager\Integrations\SymfonyCsv;
 
 class Csv
@@ -30,7 +30,6 @@ class Csv
      * @param string        $enclosure
      * @param string        $escape
      * @return array|bool
-     * @throws CorruptedFileException|NotFoundFileException|OverflowException
      */
     public static function toArray(
         string      $filePath,

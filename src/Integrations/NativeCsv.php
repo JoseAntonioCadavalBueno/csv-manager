@@ -2,6 +2,7 @@
 
 namespace CsvManager\Integrations;
 
+use CsvManager\Core\ConfigManager;
 use LogicException;
 use CsvManager\Core\BaseCsv;
 use CsvManager\Core\LanguageManager;
@@ -69,9 +70,13 @@ class NativeCsv extends BaseCsv
     {
         // Extract the extension's file.
         $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
+        $allowedExtensions = ConfigManager::get('allowed_extensions', self::ALLOWED_EXTENSIONS);
+        $allowedExtensions = is_string($allowedExtensions)
+            ? explode(',', $allowedExtensions)
+            : $allowedExtensions;
 
         // If the extension's file is different like csv, throw a CorruptedFileException.
-        if (!empty($extension) && strtolower($extension) !== self::CSV_EXTENSION) {
+        if (!empty($extension) && !in_array(strtolower($extension), $allowedExtensions)) {
             throw new CorruptedFileException(LanguageManager::getMessage('errors.corrupt_2'));
         }
 
