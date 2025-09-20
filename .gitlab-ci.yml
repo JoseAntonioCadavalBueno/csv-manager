@@ -15,7 +15,7 @@ test-php-8-0-laravel:
   stage: test
   image: bigestionlab/atomsk-php:php-8.0
   script:
-    - 'composer require illuminate/filesystem:^9.0'
+    - 'composer require laravel/framework:^8.0'
     - 'composer install'
     - 'composer test'
 
@@ -41,7 +41,7 @@ test-php-8-1-laravel:
   stage: test
   image: bigestionlab/atomsk-php:php-8.1
   script:
-    - 'composer require illuminate/filesystem:^9.0'
+    - 'composer require laravel/framework:^9.0'
     - 'composer install'
     - 'composer test'
 
@@ -67,7 +67,7 @@ test-php-8-2-laravel:
   stage: test
   image: bigestionlab/atomsk-php:php-8.2
   script:
-    - 'composer require illuminate/filesystem:^10.0'
+    - 'composer require laravel/framework:^10.0'
     - 'composer install'
     - 'composer test'
 
@@ -94,7 +94,7 @@ test-php-8-3-laravel:
   stage: test
   image: bigestionlab/atomsk-php:php-8.3
   script:
-    - 'composer require illuminate/filesystem:^11.0'
+    - 'composer require laravel/framework:^11.0'
     - 'composer install'
     - 'composer test'
 
@@ -120,7 +120,7 @@ test-php-8-4-laravel:
   stage: test
   image: bigestionlab/atomsk-php:php-8.4
   script:
-    - 'composer require illuminate/filesystem:^11.0'
+    - 'composer require laravel/framework:^11.0'
     - 'composer install'
     - 'composer test'
 
