@@ -41,7 +41,7 @@ class NativeCsv extends BaseCsv
         }
 
         // Must sanitize the value of filename.
-        $filename = self::sanitizeFullPath($filename);
+        $filename = self::sanitizeFilePath($filename);
 
         // Open to write the file.
         $file = fopen($filename, 'w');
@@ -53,38 +53,5 @@ class NativeCsv extends BaseCsv
 
         fclose($file);
         return $filename;
-    }
-
-    /* ************************ */
-    /* PRIVATE HELPER FUNCTIONS */
-    /* ************************ */
-
-    /**
-     * Function that sanitizes the $fullPath variable to avoid unexpected results.
-     *
-     * @param string $fullPath
-     * @return string
-     * @throws CorruptedFileException
-     */
-    private static function sanitizeFullPath(string $fullPath): string
-    {
-        // Extract the extension's file.
-        $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
-        $allowedExtensions = ConfigManager::get('allowed_extensions', self::ALLOWED_EXTENSIONS);
-        $allowedExtensions = is_string($allowedExtensions)
-            ? explode(',', $allowedExtensions)
-            : $allowedExtensions;
-
-        // If the extension's file is different like csv, throw a CorruptedFileException.
-        if (!empty($extension) && !in_array(strtolower($extension), $allowedExtensions)) {
-            throw new CorruptedFileException(LanguageManager::getMessage('errors.corrupt_2'));
-        }
-
-        // Add the extension's file if it doesn't have one.
-        if (empty($extension)) {
-            $fullPath .= '.' . self::CSV_EXTENSION;
-        }
-
-        return self::sanitizeFileName($fullPath);
     }
 }

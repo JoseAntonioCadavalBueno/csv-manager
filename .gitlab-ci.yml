@@ -4,30 +4,78 @@ stages:
 # ---------------------------------------
 # PHP 8.0
 # ---------------------------------------
-test-php-8-0:
+test-php-8-0-native:
   stage: test
   image: bigestionlab/atomsk-php:php-8.0
   script:
     - 'composer install'
     - 'composer test'
 
+test-php-8-0-laravel:
+  stage: test
+  image: bigestionlab/atomsk-php:php-8.0
+  script:
+    - 'composer require illuminate/filesystem:^9.0'
+    - 'composer install'
+    - 'composer test'
+
+test-php-8-0-symfony:
+  stage: test
+  image: bigestionlab/atomsk-php:php-8.0
+  script:
+    - 'composer require symfony/filesystem:^6.0'
+    - 'composer install'
+    - 'composer test'
+
 # ---------------------------------------
 # PHP 8.1
 # ---------------------------------------
-test-php-8-1:
+test-php-8-1-native:
   stage: test
   image: bigestionlab/atomsk-php:php-8.1
   script:
     - 'composer install'
     - 'composer test'
 
+test-php-8-1-laravel:
+  stage: test
+  image: bigestionlab/atomsk-php:php-8.1
+  script:
+    - 'composer require illuminate/filesystem:^9.0'
+    - 'composer install'
+    - 'composer test'
+
+test-php-8-1-symfony:
+  stage: test
+  image: bigestionlab/atomsk-php:php-8.1
+  script:
+    - 'composer require symfony/filesystem:^7.0'
+    - 'composer install'
+    - 'composer test'
+
 # ---------------------------------------
 # PHP 8.2
 # ---------------------------------------
-test-php-8-2:
+test-php-8-2-native:
   stage: test
   image: bigestionlab/atomsk-php:php-8.2
   script:
+    - 'composer install'
+    - 'composer test'
+
+test-php-8-2-laravel:
+  stage: test
+  image: bigestionlab/atomsk-php:php-8.2
+  script:
+    - 'composer require illuminate/filesystem:^10.0'
+    - 'composer install'
+    - 'composer test'
+
+test-php-8-2-symfony:
+  stage: test
+  image: bigestionlab/atomsk-php:php-8.2
+  script:
+    - 'composer require symfony/filesystem:^7.0'
     - 'composer install'
     - 'composer test'
 
@@ -35,19 +83,51 @@ test-php-8-2:
 # ---------------------------------------
 # PHP 8.3
 # ---------------------------------------
-test-php-8-3:
+test-php-8-3-native:
   stage: test
   image: bigestionlab/atomsk-php:php-8.3
   script:
     - 'composer install'
     - 'composer test'
 
+test-php-8-3-laravel:
+  stage: test
+  image: bigestionlab/atomsk-php:php-8.3
+  script:
+    - 'composer require illuminate/filesystem:^11.0'
+    - 'composer install'
+    - 'composer test'
+
+test-php-8-3-symfony:
+  stage: test
+  image: bigestionlab/atomsk-php:php-8.3
+  script:
+    - 'composer require symfony/filesystem:^7.0'
+    - 'composer install'
+    - 'composer test'
+
 # ---------------------------------------
 # PHP 8.4
 # ---------------------------------------
-test-php-8-4:
+test-php-8-4-native:
   stage: test
   image: bigestionlab/atomsk-php:php-8.4
   script:
+    - 'composer install'
+    - 'composer test'
+
+test-php-8-4-laravel:
+  stage: test
+  image: bigestionlab/atomsk-php:php-8.4
+  script:
+    - 'composer require illuminate/filesystem:^11.0'
+    - 'composer install'
+    - 'composer test'
+
+test-php-8-4-symfony:
+  stage: test
+  image: bigestionlab/atomsk-php:php-8.4
+  script:
+    - 'composer require symfony/filesystem:^7.0'
     - 'composer install'
     - 'composer test'

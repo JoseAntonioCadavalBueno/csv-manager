@@ -30,6 +30,7 @@ class Csv
      * @param string        $enclosure
      * @param string        $escape
      * @return array|bool
+     * @throws CorruptedFileException|NotFoundFileException|OverflowException
      */
     public static function toArray(
         string      $filePath,
