@@ -211,24 +211,23 @@ abstract class BaseCsv implements ICsv
     {
         if (!is_null($filename))
         {
-            if (str_contains($filename, '.'))
+            // Extract the extension's file.
+            $extension = pathinfo($filename, PATHINFO_EXTENSION);
+            if (!empty($extension))
             {
-                $extension = pathinfo($filename);
                 $allowedExtensions = ConfigManager::get('allowed_extensions', self::ALLOWED_EXTENSIONS);
                 $allowedExtensions = is_string($allowedExtensions)
                     ? explode(',', $allowedExtensions)
                     : $allowedExtensions;
+
                 if (!in_array($extension, $allowedExtensions))
                 {
                     throw new CorruptedFileException(LanguageManager::getMessage('errors.corrupt_2'));
                 }
+                return $filename;
             }
-
-            $filename = $filename . '.' . self::CSV_EXTENSION;
-        } else
-        {
-            $filename = self::CSV_EXTENSION . '_' . uniqid() . '.' . self::CSV_EXTENSION;
+            return $filename . '.' . self::CSV_EXTENSION;
         }
-        return $filename;
+        return self::CSV_EXTENSION . '_' . uniqid() . '.' . self::CSV_EXTENSION;
     }
 }

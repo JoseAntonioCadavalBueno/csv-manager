@@ -5,7 +5,7 @@ namespace tests\Unit;
 use CsvManager\Facades\Csv;
 use PHPUnit\Framework\TestCase;
 
-class CsvFromArrayNativeTest extends TestCase
+class CsvFromArrayTest extends TestCase
 {
     const CSV_TEST_PATH = __DIR__ . DIRECTORY_SEPARATOR . '..'
         . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR
