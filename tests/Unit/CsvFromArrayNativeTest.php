@@ -34,24 +34,38 @@ class CsvFromArrayNativeTest extends TestCase
     }
 
     /**
-     * Unitary test that generate a csv file from array in native php
+     * Unitary test that generate a csv file from array
      *
      * @test
      */
-    public function test_generate_a_csv_file_from_array_in_native_php()
+    public function test_generate_a_csv_file_from_array()
     {
-        $result = Csv::fromArray(self::RAW_DATA, self::CSV_TEST_PATH . 'native_php.csv');
+        if (class_exists('Illuminate\Support\Facades\Storage')) {
+            $filename = 'laravel_php.csv';
+        } elseif (class_exists('Symfony\Component\Filesystem\Filesystem')) {
+            $filename = 'symfony_php.csv';
+        } else {
+            $filename = self::CSV_TEST_PATH . 'native_php.csv';
+        }
+        $result = Csv::fromArray(self::RAW_DATA, $filename);
         $this->assertFileExists($result);
     }
 
     /**
-     * Unitary test that generate a txt file from array in native php
+     * Unitary test that generate a txt file from array
      *
      * @test
      */
-    public function test_generate_a_txt_file_from_array_in_native_php()
+    public function test_generate_a_txt_file_from_array()
     {
-        $result = Csv::fromArray(self::RAW_DATA, self::CSV_TEST_PATH . 'native_php.txt');
+        if (class_exists('Illuminate\Support\Facades\Storage')) {
+            $filename = 'laravel_php.txt';
+        } elseif (class_exists('Symfony\Component\Filesystem\Filesystem')) {
+            $filename = 'symfony_php.txt';
+        } else {
+            $filename = self::CSV_TEST_PATH . 'native_php.txt';
+        }
+        $result = Csv::fromArray(self::RAW_DATA, $filename);
         $this->assertFileExists($result);
     }
 }
