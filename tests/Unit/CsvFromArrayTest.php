@@ -25,7 +25,7 @@ class CsvFromArrayTest extends TestCase
         parent::setUp();
         if (class_exists('Illuminate\Support\Facades\Storage'))
         {
-            $app = new \Illuminate\Container\Container();
+            $app = new \Illuminate\Foundation\Application();
             \Illuminate\Support\Facades\Facade::setFacadeApplication($app);
 
             $app->instance('path.storage', self::CSV_TEST_PATH);
