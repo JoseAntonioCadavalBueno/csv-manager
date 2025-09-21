@@ -31,7 +31,7 @@ class CsvFromArrayTest extends TestCase
             {
                 return [
                     'filesystems.default' => 'public',
-                    'fylesystems.disks.public' => [
+                    'filesystems.disks.public' => [
                         'driver'        => 'local',
                         'root'          => self::CSV_TEST_PATH,
                         'url'           => '/storage',
