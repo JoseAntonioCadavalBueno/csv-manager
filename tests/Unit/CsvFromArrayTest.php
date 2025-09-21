@@ -20,6 +20,43 @@ class CsvFromArrayTest extends TestCase
         [5, 'User5', 25, 'Country5', 'user5@example.com', 'Sample text for large dataset.'],
     ];
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        if (class_exists('Illuminate\Support\Facades\Storage'))
+        {
+            $tmp = sys_get_temp_dir() . '/csv-tests';
+
+            if (!is_dir($tmp))
+            {
+                mkdir($tmp, 0777, true);
+            }
+
+            $app = new Illuminate\Container\Container();
+            Illuminate\Support\Facades\Facade::setFacadeApplication($app);
+            $app->singleton('config', function ()
+            {
+                return [
+                    'filesystems.default' => 'local',
+                    'fylesystems.disks.local' => [
+                        'driver' => 'local',
+                        'root' => sys_get_temp_dir()
+                    ]
+                ];
+            });
+
+            $app->singleton('files', function ()
+            {
+                return new Illuminate\Filesystem\FileSystem();
+            });
+
+            $app->singleton('filesystem', function($app)
+            {
+                return new Illuminate\Filesystem\FilesystemManager($app);
+            });
+        }
+    }
+
     public function tearDown(): void
     {
         $files = glob(realpath(self::CSV_TEST_PATH) . '/*');
