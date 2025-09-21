@@ -2,23 +2,12 @@
 
 namespace CsvManager\Contracts;
 
-use CsvManager\src\Exceptions\CorruptedFileException;
-use CsvManager\src\Exceptions\NotFoundFileException;
-use CsvManager\src\Exceptions\OverflowException;
+use CsvManager\Exceptions\CorruptedFileException;
+use CsvManager\Exceptions\NotFoundFileException;
+use CsvManager\Exceptions\OverflowException;
 
 interface ICsv
 {
-    /* **************** */
-    /* GETTER FUNCTIONS */
-    /* **************** */
-
-    /**
-     * A getter function that returns the value of $freeMemory.
-     *
-     * @return int
-     */
-    public static function getFreeMemory(): int;
-
     /* **************** */
     /* PUBLIC FUNCTIONS */
     /* **************** */

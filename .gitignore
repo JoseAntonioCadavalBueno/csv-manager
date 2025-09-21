@@ -2,6 +2,9 @@ vendor
 composer.lock
 resources/test-csv/*
 !resources/test-csv/.gitkeep
+!resources/test-csv/app/
+!resources/test-csv/app/public/
+!resources/test-csv/app/public/.gitkeep
 .phpunit.result.cache
 php-test-framework.xml
 .idea
