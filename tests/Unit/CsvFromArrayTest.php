@@ -25,22 +25,17 @@ class CsvFromArrayTest extends TestCase
         parent::setUp();
         if (class_exists('Illuminate\Support\Facades\Storage'))
         {
-            $tmp = sys_get_temp_dir() . '/csv-tests';
-
-            if (!is_dir($tmp))
-            {
-                mkdir($tmp, 0777, true);
-            }
-
             $app = new \Illuminate\Container\Container();
             \Illuminate\Support\Facades\Facade::setFacadeApplication($app);
             $app->singleton('config', function ()
             {
                 return [
-                    'filesystems.default' => 'local',
-                    'fylesystems.disks.local' => [
-                        'driver' => 'local',
-                        'root' => sys_get_temp_dir()
+                    'filesystems.default' => 'public',
+                    'fylesystems.disks.public' => [
+                        'driver'        => 'local',
+                        'root'          => self::CSV_TEST_PATH,
+                        'url'           => '/storage',
+                        'visibility'    => 'public'
                     ]
                 ];
             });
