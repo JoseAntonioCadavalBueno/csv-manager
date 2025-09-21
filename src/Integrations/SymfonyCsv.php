@@ -4,6 +4,7 @@ namespace CsvManager\Integrations;
 
 use CsvManager\Core\BaseCsv;
 use CsvManager\Exceptions\CorruptedFileException;
+use SplFileObject;
 use Symfony\Component\Filesystem\Filesystem;
 
 class SymfonyCsv extends BaseCsv

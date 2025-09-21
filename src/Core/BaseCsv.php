@@ -19,23 +19,6 @@ abstract class BaseCsv implements ICsv
     const ALLOWED_EXTENSIONS = [ self::CSV_EXTENSION, self::TXT_EXTENSION ];
     const SANITIZE_REGEX = '/[^a-zA-Z0-9\/\\\\:\.\-_]/';
 
-    /** @var int $freeMemory */
-    protected static int $freeMemory;
-
-    /* **************** */
-    /* GETTER FUNCTIONS */
-    /* **************** */
-
-    /**
-     * A getter function that returns the value of $freeMemory.
-     *
-     * @return int
-     */
-    public static function getFreeMemory(): int
-    {
-        return self::$freeMemory;
-    }
-
     /* **************** */
     /* PUBLIC FUNCTIONS */
     /* **************** */
@@ -145,30 +128,11 @@ abstract class BaseCsv implements ICsv
      */
     protected static function fileSizeExceedsMemoryLimit(string $filePath): bool
     {
-        // Calculate the free memory before processing.
-        self::calculateFreeMemory();
-
         // The unit of measurement always in bytes.
         $fileSize = filesize($filePath);
 
         // If the file size is larger than the calculated percentage of php memory limit we return true.
-        return $fileSize > self::$freeMemory * self::MEMORY_LIMIT_PERCENT;
-    }
-
-    /**
-     * Function that determines the best size
-     * of the chunk depending on the available free memory.
-     *
-     * @param int|null $chunkSize
-     * @return int
-     */
-    protected static function calculateChunkSize(?int $chunkSize): int
-    {
-        if (is_null($chunkSize)) {
-            $chunkSize = self::DEFAULT_CHUNK_SIZE;
-        }
-
-        return min(5000, intval(self::$freeMemory / $chunkSize));
+        return $fileSize > self::calculateFreeMemory() * self::MEMORY_LIMIT_PERCENT;
     }
 
     /**
@@ -185,9 +149,7 @@ abstract class BaseCsv implements ICsv
 
         // Calculate the free memory, save it in the static variable and return it.
         $usedMemory = memory_get_usage(true);
-        self::$freeMemory = $memoryLimit - $usedMemory;
-
-        return self::$freeMemory;
+        return $memoryLimit - $usedMemory;
     }
 
     /**
@@ -249,24 +211,23 @@ abstract class BaseCsv implements ICsv
     {
         if (!is_null($filename))
         {
-            if (str_contains($filename, '.'))
+            // Extract the extension's file.
+            $extension = pathinfo($filename, PATHINFO_EXTENSION);
+            if (!empty($extension))
             {
-                $extension = pathinfo($filename);
                 $allowedExtensions = ConfigManager::get('allowed_extensions', self::ALLOWED_EXTENSIONS);
                 $allowedExtensions = is_string($allowedExtensions)
                     ? explode(',', $allowedExtensions)
                     : $allowedExtensions;
+
                 if (!in_array($extension, $allowedExtensions))
                 {
                     throw new CorruptedFileException(LanguageManager::getMessage('errors.corrupt_2'));
                 }
+                return $filename;
             }
-
-            $filename = $filename . '.' . self::CSV_EXTENSION;
-        } else
-        {
-            $filename = self::CSV_EXTENSION . '_' . uniqid() . '.' . self::CSV_EXTENSION;
+            return $filename . '.' . self::CSV_EXTENSION;
         }
-        return $filename;
+        return self::CSV_EXTENSION . '_' . uniqid() . '.' . self::CSV_EXTENSION;
     }
 }
