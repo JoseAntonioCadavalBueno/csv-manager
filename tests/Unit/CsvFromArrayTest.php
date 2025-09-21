@@ -42,7 +42,7 @@ class CsvFromArrayTest extends TestCase
 
             $app->singleton('files', function ()
             {
-                return new \Illuminate\Filesystem\FileSystem();
+                return new \Illuminate\Filesystem\Filesystem();
             });
 
             $app->singleton('filesystem', function($app)
