@@ -32,8 +32,8 @@ class CsvFromArrayTest extends TestCase
                 mkdir($tmp, 0777, true);
             }
 
-            $app = new Illuminate\Container\Container();
-            Illuminate\Support\Facades\Facade::setFacadeApplication($app);
+            $app = new \Illuminate\Container\Container();
+            \Illuminate\Support\Facades\Facade::setFacadeApplication($app);
             $app->singleton('config', function ()
             {
                 return [
@@ -47,12 +47,12 @@ class CsvFromArrayTest extends TestCase
 
             $app->singleton('files', function ()
             {
-                return new Illuminate\Filesystem\FileSystem();
+                return new \Illuminate\Filesystem\FileSystem();
             });
 
             $app->singleton('filesystem', function($app)
             {
-                return new Illuminate\Filesystem\FilesystemManager($app);
+                return new \Illuminate\Filesystem\FilesystemManager($app);
             });
         }
     }
