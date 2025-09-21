@@ -27,6 +27,9 @@ class CsvFromArrayTest extends TestCase
         {
             $app = new \Illuminate\Container\Container();
             \Illuminate\Support\Facades\Facade::setFacadeApplication($app);
+
+            $app->instance('path.storage', self::CSV_TEST_PATH);
+
             $app->singleton('config', function ()
             {
                 return [
