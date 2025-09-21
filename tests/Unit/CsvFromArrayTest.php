@@ -25,18 +25,19 @@ class CsvFromArrayTest extends TestCase
         parent::setUp();
         if (class_exists('Illuminate\Support\Facades\Storage'))
         {
+            $path = realpath(self::CSV_TEST_PATH);
             $app = new \Illuminate\Foundation\Application();
             \Illuminate\Support\Facades\Facade::setFacadeApplication($app);
 
-            $app->instance('path.storage', self::CSV_TEST_PATH);
+            $app->instance('path.storage', $path);
 
-            $app->singleton('config', function ()
+            $app->singleton('config', function () use ($path)
             {
                 return [
                     'filesystems.default' => 'public',
                     'filesystems.disks.public' => [
                         'driver'        => 'local',
-                        'root'          => self::CSV_TEST_PATH,
+                        'root'          =>  $path,
                         'url'           => '/storage',
                         'visibility'    => 'public'
                     ]
