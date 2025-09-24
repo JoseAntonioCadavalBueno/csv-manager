@@ -3,7 +3,9 @@
 namespace CsvManager\Integrations;
 
 use CsvManager\Core\BaseCsv;
+use CsvManager\Core\ConfigManager;
 use CsvManager\Exceptions\CorruptedFileException;
+use CsvManager\Exceptions\NotFoundFileException;
 use Illuminate\Support\Facades\Storage;
 
 class LaravelCsv extends BaseCsv
@@ -14,30 +16,35 @@ class LaravelCsv extends BaseCsv
     /**
      * A function that generates a CSV file from an array.
      *
-     * @param array $data
-     * @param string|null $filename
-     * @param string $delimiter
-     * @param string $enclosure
-     * @param string|null $customPath
+     * @param array         $data
+     * @param string|null   $filename
+     * @param string        $delimiter
+     * @param string        $enclosure
+     * @param string|null   $path
+     * @param string|null   $disk
      * @return string
-     * @throws CorruptedFileException
+     * @throws CorruptedFileException|NotFoundFileException
      */
     public static function fromArray(
         array   $data,
         ?string $filename   = null,
         string  $delimiter  = ',',
         string  $enclosure  = '"',
-        ?string $customPath = null
+        ?string $path       = null,
+        ?string $disk       = null
     ): string
     {
-        $filename = self::generateFileName($filename);
+        $filename   = self::generateFileName($filename);
+        $disk       = $disk ?? self::STORAGE_PATH;
 
-        if (!is_null($customPath)) {
-            $filePath   = self::sanitizeFileName($customPath);
-            $publicPath = 'app' . DIRECTORY_SEPARATOR . $filePath . DIRECTORY_SEPARATOR . $filename;
-        } else {
-            $filePath   = self::STORAGE_PATH;
-            $publicPath = self::PUBLIC_PATH . DIRECTORY_SEPARATOR . $filename;
+        $relativePath = !is_null($path)
+            ? self::sanitizeFilePath($path . DIRECTORY_SEPARATOR . $filename)
+            : $filename;
+
+        $dir = dirname(Storage::disk($disk)->path($relativePath));
+        if (!is_dir($dir))
+        {
+            throw new NotFoundFileException(ConfigManager::get('errors.not_found_2'));
         }
 
         $csvContent = '';
@@ -45,10 +52,10 @@ class LaravelCsv extends BaseCsv
             $csvContent .= $enclosure . implode($delimiter, $row) . $enclosure . "\n";
         }
 
-        // Save the CSV in 'Storage/app/public/'
-        Storage::disk($filePath)->put($filename, $csvContent);
+        // Save the CSV
+        Storage::disk($relativePath)->put($filename, $csvContent);
 
         // Return the path of the generated file.
-        return storage_path($publicPath);
+        return Storage::disk($disk)->path($relativePath);
     }
 }

@@ -3,7 +3,10 @@
 namespace CsvManager\Integrations;
 
 use CsvManager\Core\BaseCsv;
+use CsvManager\Core\ConfigManager;
+use CsvManager\Core\LanguageManager;
 use CsvManager\Exceptions\CorruptedFileException;
+use LogicException;
 use SplFileObject;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -14,11 +17,12 @@ class SymfonyCsv extends BaseCsv
     /**
      * A function that generates a CSV file from an array.
      *
-     * @param array $data
-     * @param string|null $filename
-     * @param string $delimiter
-     * @param string $enclosure
-     * @param string|null $customPath
+     * @param array         $data
+     * @param string|null   $filename
+     * @param string        $delimiter
+     * @param string        $enclosure
+     * @param string|null   $path
+     * @param string|null   $disk
      * @return string
      * @throws CorruptedFileException
      */
@@ -27,24 +31,30 @@ class SymfonyCsv extends BaseCsv
         ?string $filename   = null,
         string  $delimiter  = ',',
         string  $enclosure  = '"',
-        ?string $customPath = null
+        ?string $path       = null,
+        ?string $disk       = null
     ): string
     {
         $filename = self::generateFileName($filename);
 
-        $filePath = !is_null($customPath)
-            ? self::sanitizeFileName($customPath) . $filename
+        if (!is_null($disk))
+        {
+           throw new LogicException(LanguageManager::getMessage('errors.symfony_logic'));
+        }
+
+        $relativePath = !is_null($path)
+            ? self::sanitizeFileName($path . DIRECTORY_SEPARATOR . $filename)
             : self::SYMFONY_DIR . $filename;
 
         $filesystem = new Filesystem();
-        $filesystem->mkdir(dirname($filePath));
+        $filesystem->mkdir(dirname($relativePath));
 
-        $file = new SplFileObject($filePath, 'w');
+        $file = new SplFileObject($relativePath, 'w');
 
         foreach ($data as $row) {
             $file->fputcsv($row, $delimiter, $enclosure);
         }
 
-        return $filePath;
+        return $relativePath;
     }
 }

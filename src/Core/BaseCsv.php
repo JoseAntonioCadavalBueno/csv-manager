@@ -30,15 +30,18 @@ abstract class BaseCsv implements ICsv
      * @param string|null   $filename
      * @param string        $delimiter
      * @param string        $enclosure
-     * @param string|null   $customPath
+     * @param string|null   $path
+     * @param string|null   $disk
      * @return string
+     * @throws CorruptedFileException|NotFoundFileException
      */
     abstract public static function fromArray(
         array   $data,
         ?string $filename   = null,
         string  $delimiter  = ',',
         string  $enclosure  = '"',
-        ?string $customPath = null
+        ?string $path       = null,
+        ?string $disk       = null
     ): string;
 
     /**
@@ -66,13 +69,19 @@ abstract class BaseCsv implements ICsv
     {
         // Sanitize the file path to prevent unexpected results.
         $filePath   = self::sanitizeFilePath($filePath);
+
+        if (!self::isValidFile($filePath))
+        {
+            throw new NotFoundFileException(null);
+        }
+
         try
         {
             $file = fopen($filePath, 'r');
         } catch (Throwable $exception)
         {
-            // If the file cannot be opened, return a NotFoundFileException.
-            throw new NotFoundFileException(null, 404, $exception);
+            // If the file cannot be opened, return a CorruptedFileException.
+            throw new CorruptedFileException(previous: $exception);
         }
 
         $data = [];
@@ -181,11 +190,6 @@ abstract class BaseCsv implements ICsv
             throw new CorruptedFileException(LanguageManager::getMessage('errors.corrupt_2'));
         }
 
-        if (file_exists($satinizedFilePath) && !is_readable($satinizedFilePath))
-        {
-            throw new CorruptedFileException();
-        }
-
         return $satinizedFilePath;
     }
 
@@ -229,5 +233,16 @@ abstract class BaseCsv implements ICsv
             return $filename . '.' . self::CSV_EXTENSION;
         }
         return self::CSV_EXTENSION . '_' . uniqid() . '.' . self::CSV_EXTENSION;
+    }
+
+    /**
+     * Check if exist and is valid file.
+     *
+     * @param string $satinizedFilePath
+     * @return bool
+     */
+    protected static function isValidFile(string $satinizedFilePath): bool
+    {
+        return file_exists($satinizedFilePath) && is_readable($satinizedFilePath);
     }
 }
