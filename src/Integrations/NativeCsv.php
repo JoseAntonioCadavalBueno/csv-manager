@@ -18,16 +18,19 @@ class NativeCsv extends BaseCsv
      * @param string|null   $filename
      * @param string        $delimiter
      * @param string        $enclosure
-     * @param string|null   $customPath
+     * @param string|null   $path
+     * @param string|null   $disk
      * @return string
-     * @throws CorruptedFileException|NotFoundFileException|LogicException
+     * @throws CorruptedFileException
+     * @throws NotFoundFileException
      */
     public static function fromArray(
         array   $data,
         ?string $filename   = null,
         string  $delimiter  = ',',
         string  $enclosure  = '"',
-        ?string $customPath = null
+        ?string $path       = null,
+        ?string $disk       = null
     ): string
     {
         // In native php projects $filename must be the fullPath.
@@ -36,8 +39,8 @@ class NativeCsv extends BaseCsv
         }
 
         // In native php projects $customPath always be null.
-        if (!is_null($customPath)) {
-            throw new LogicException(LanguageManager::getMessage('errors.logic'));
+        if (!is_null($path) || !is_null($disk)) {
+            throw new LogicException(LanguageManager::getMessage('errors.native_logic'));
         }
 
         // Must sanitize the value of filename.

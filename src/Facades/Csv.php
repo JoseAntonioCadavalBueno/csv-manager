@@ -3,15 +3,23 @@
 namespace CsvManager\Facades;
 
 use CsvManager\Contracts\ICsv;
+use CsvManager\Core\ConfigManager;
+use CsvManager\Core\LanguageManager;
 use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
 use CsvManager\Exceptions\OverflowException;
 use CsvManager\Integrations\LaravelCsv;
 use CsvManager\Integrations\NativeCsv;
 use CsvManager\Integrations\SymfonyCsv;
+use LogicException;
 
 class Csv
 {
+    const LARAVEL_ENV = 'laravel';
+    const SYMFONY_ENV = 'symfony';
+    const NATIVE_ENV  = 'native';
+    const ALLOWED_ENV_CONFIG = [self::NATIVE_ENV, self::LARAVEL_ENV, self::SYMFONY_ENV];
+
     /** @var ICsv $instance */
     private static ICsv $instance;
 
@@ -96,9 +104,16 @@ class Csv
     private static function resolveInstance(): void
     {
         if (!isset(self::$instance)) {
-            if (class_exists('Illuminate\Support\Facades\Storage')) {
+            $env = ConfigManager::get('env_config');
+
+            if (!in_array($env, self::ALLOWED_ENV_CONFIG))
+            {
+                throw new LogicException(LanguageManager::getMessage('errors.illegal_env'));
+            }
+
+            if ($env === self::LARAVEL_ENV && class_exists('Illuminate\Support\Facades\Storage')) {
                 self::$instance = new LaravelCsv();
-            } elseif (class_exists('Symfony\Component\Filesystem\Filesystem')) {
+            } elseif ($env === self::SYMFONY_ENV && class_exists('Symfony\Component\Filesystem\Filesystem')) {
                 self::$instance = new SymfonyCsv();
             } else {
                 self::$instance = new NativeCsv();
