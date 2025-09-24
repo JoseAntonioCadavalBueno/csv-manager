@@ -11,6 +11,14 @@ test-php-8-0-native:
     - 'composer install'
     - 'composer test'
 
+test-php-8-0-laravel:
+  stage: test
+  image: bigestionlab/atomsk-php:php-8.2
+  script:
+    - 'composer require laravel/framework:^8.0'
+    - 'composer install'
+    - 'composer test'
+
 test-php-8-0-symfony:
   stage: test
   image: bigestionlab/atomsk-php:php-8.0
@@ -29,6 +37,14 @@ test-php-8-1-native:
     - 'composer install'
     - 'composer test'
 
+test-php-8-1-laravel:
+  stage: test
+  image: bigestionlab/atomsk-php:php-8.1
+  script:
+    - 'composer require laravel/framework:^9.0'
+    - 'composer install'
+    - 'composer test'
+
 test-php-8-1-symfony:
   stage: test
   image: bigestionlab/atomsk-php:php-8.1
@@ -44,6 +60,14 @@ test-php-8-2-native:
   stage: test
   image: bigestionlab/atomsk-php:php-8.2
   script:
+    - 'composer install'
+    - 'composer test'
+
+test-php-8-2-laravel:
+  stage: test
+  image: bigestionlab/atomsk-php:php-8.2
+  script:
+    - 'composer require laravel/framework:^10.0'
     - 'composer install'
     - 'composer test'
 
@@ -66,6 +90,14 @@ test-php-8-3-native:
     - 'composer install'
     - 'composer test'
 
+test-php-8-3-laravel:
+  stage: test
+  image: bigestionlab/atomsk-php:php-8.3
+  script:
+    - 'composer require laravel/framework:^10.0'
+    - 'composer install'
+    - 'composer test'
+
 test-php-8-3-symfony:
   stage: test
   image: bigestionlab/atomsk-php:php-8.3
@@ -81,6 +113,14 @@ test-php-8-4-native:
   stage: test
   image: bigestionlab/atomsk-php:php-8.4
   script:
+    - 'composer install'
+    - 'composer test'
+
+test-php-8-4-laravel:
+  stage: test
+  image: bigestionlab/atomsk-php:php-8.4
+  script:
+    - 'composer require laravel/framework:^10.0'
     - 'composer install'
     - 'composer test'
 

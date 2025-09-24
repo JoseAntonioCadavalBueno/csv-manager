@@ -1,6 +1,14 @@
 <?php
 
 return [
+
+    /*
+    | Define the environment config.
+    | --------------------------------------------------------------
+    | You can define a native, laravel or symfony environment config.
+    */
+    'env_config' => 'native',
+
     /*
     | Define the language of the messages for the use of the library
     | --------------------------------------------------------------
