@@ -118,7 +118,7 @@ abstract class BaseCsv implements ICsv
         flock($file, LOCK_UN);
         fclose($file);
 
-        if (empty($data)) {
+        if (empty($data) && !is_null($function)) {
             return true;
         }
         return $data;

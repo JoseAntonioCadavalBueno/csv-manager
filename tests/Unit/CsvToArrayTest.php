@@ -12,10 +12,12 @@ use PHPUnit\Framework\TestCase;
 class CsvToArrayTest extends TestCase
 {
     const CSV_TEST_PATH     = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'test-csv' . DIRECTORY_SEPARATOR;
-    const BIGGER_CSV   = self::CSV_TEST_PATH . 'biggerTest.csv';
-    const BIGGER_TXT   = self::CSV_TEST_PATH . 'biggerTest.txt';
-    const SMALLER_CSV  = self::CSV_TEST_PATH . 'smallerTest.csv';
-    const SMALLER_TXT  = self::CSV_TEST_PATH . 'smallerTest.txt';
+    const BIGGER_CSV    = self::CSV_TEST_PATH . 'biggerTest.csv';
+    const BIGGER_TXT    = self::CSV_TEST_PATH . 'biggerTest.txt';
+    const SMALLER_CSV   = self::CSV_TEST_PATH . 'smallerTest.csv';
+    const SMALLER_TXT   = self::CSV_TEST_PATH . 'smallerTest.txt';
+    const EMPTY_CSV     = self::CSV_TEST_PATH . 'emptyTest.csv';
+    const EMPTY_TXT     = self::CSV_TEST_PATH . 'emptyTest.txt';
 
     const MALICIOUS_INPUTS  = [
         "test.csv; rm -rf /",
@@ -74,6 +76,9 @@ class CsvToArrayTest extends TestCase
         $this->generateCsv(self::SMALLER_TXT, 10, 1);
         $this->generateCsv(self::BIGGER_CSV, 500000, 10);
         $this->generateCsv(self::BIGGER_TXT, 500000, 10);
+        $this->generateCsv(self::EMPTY_CSV, 0, 0);
+        $this->generateCsv(self::EMPTY_TXT, 0, 0);
+
     }
 
     public function tearDown(): void
@@ -91,6 +96,64 @@ class CsvToArrayTest extends TestCase
     /* ***** */
     /* TESTS */
     /* ***** */
+
+    /**
+     * Unitary test that processes an empty csv and return and empty array if dont use callable.
+     *
+     * @test
+     */
+    public function test_processes_empty_csv_and_return_empty_array_if_dont_use_callable()
+    {
+        $result = Csv::toArray(realpath(self::EMPTY_CSV), true);
+
+        $this->assertIsArray($result);
+        $this->assertCount(0, $result);
+    }
+
+    /**
+     * Unitary test that processes an empty txt and return and empty array if dont use callable.
+     *
+     * @test
+     */
+    public function test_processes_empty_txt_and_return_empty_array_if_dont_use_callable()
+    {
+        $result = Csv::toArray(realpath(self::EMPTY_TXT), true);
+
+        $this->assertIsArray($result);
+        $this->assertCount(0, $result);
+    }
+
+    /**
+     * Unitary test that processes an empty csv and return true if use callable.
+     *
+     * @test
+     */
+    public function test_processes_empty_csv_and_return_true_if_use_callable()
+    {
+        $result = Csv::toArray(realpath(self::EMPTY_CSV), true,
+            function ()
+            {
+                return;
+            });
+
+        $this->assertTrue($result);
+    }
+
+    /**
+     * Unitary test that processes an empty txt and return true if use callable.
+     *
+     * @test
+     */
+    public function test_processes_empty_txt_and_return_true_if_use_callable()
+    {
+        $result = Csv::toArray(realpath(self::EMPTY_TXT), true,
+            function ()
+            {
+                return;
+            });
+
+        $this->assertTrue($result);
+    }
 
     /**
      * Unitary test that processes csv of smaller size than memory limit when function is null.
