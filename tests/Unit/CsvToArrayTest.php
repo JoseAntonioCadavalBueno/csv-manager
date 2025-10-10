@@ -7,6 +7,8 @@ use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
 use CsvManager\Exceptions\OverflowException;
 use CsvManager\Facades\Csv;
+use InvalidArgumentException;
+use LogicException;
 use PHPUnit\Framework\TestCase;
 
 class CsvToArrayTest extends TestCase
@@ -334,6 +336,122 @@ class CsvToArrayTest extends TestCase
         } catch (CorruptedFileException $exception) {
             $this->assertEquals(415, $exception->getCode());
             $this->assertEquals(LanguageManager::getMessage('errors.corrupt_2'), $exception->getMessage());
+        }
+    }
+
+    /**
+     * Unitary test that try to use an invalid delimiter.
+     *
+     * @test
+     */
+    public function test_use_an_invalid_delimiter()
+    {
+       try
+       {
+            Csv::toArray(
+                filePath: realpath(self::SMALLER_CSV),
+                delimiter: 'à'
+            );
+       } catch (InvalidArgumentException $exception)
+       {
+            $this->assertEquals("The 'delimiter' character is not allowed.", $exception->getMessage());
+       }
+    }
+
+    /**
+     * Unitary test that try to use a carriage return like delimiter.
+     *
+     * @test
+     */
+    public function test_use_a_carriage_return_like_delimiter()
+    {
+        try
+        {
+            Csv::toArray(
+                filePath: realpath(self::SMALLER_CSV),
+                delimiter: '\r'
+            );
+        } catch (InvalidArgumentException $exception)
+        {
+            $this->assertEquals("The 'delimiter' character is not allowed.", $exception->getMessage());
+        }
+    }
+
+    /**
+     * Unitary test that try to use a newline char like delimiter.
+     *
+     * @test
+     */
+    public function test_use_a_newline_char_like_delimiter()
+    {
+        try
+        {
+            Csv::toArray(
+                filePath: realpath(self::SMALLER_CSV),
+                delimiter: '\n'
+            );
+        } catch (InvalidArgumentException $exception)
+        {
+            $this->assertEquals("The 'delimiter' character is not allowed.", $exception->getMessage());
+        }
+    }
+
+    /**
+     * Unitary test that try to use an invalid enclosure.
+     *
+     * @test
+     */
+    public function test_use_an_invalid_enclosure()
+    {
+        try
+        {
+            Csv::toArray(
+                filePath: realpath(self::SMALLER_CSV),
+                enclosure: 'à'
+            );
+        } catch (InvalidArgumentException $exception)
+        {
+            $this->assertEquals("The 'enclosure' character is not allowed.", $exception->getMessage());
+        }
+    }
+
+    /**
+     * Unitary test that try to use an invalid escape.
+     *
+     * @test
+     */
+    public function test_use_an_invalid_escape()
+    {
+        try
+        {
+            Csv::toArray(
+                filePath: realpath(self::SMALLER_CSV),
+                escape: 'à'
+            );
+        } catch (InvalidArgumentException $exception)
+        {
+            $this->assertEquals("The 'escape' character is not allowed.", $exception->getMessage());
+        }
+    }
+
+    /**
+     * Unitary test that try to use the same char for delimiter, escape and enclosure.
+     *
+     * @test
+     */
+    public function test_use_the_same_char_for_delimiter_escape_and_enclosure()
+    {
+        try
+        {
+            Csv::toArray(
+                filePath: realpath(self::SMALLER_CSV),
+                delimiter: '\t',
+                enclosure: '\t',
+                escape: '\t'
+            );
+        } catch (LogicException $exception)
+        {
+            $this->assertEquals("The 'delimiter', 'enclosure', and 'escape' must be different.", $exception->getMessage());
         }
     }
 }

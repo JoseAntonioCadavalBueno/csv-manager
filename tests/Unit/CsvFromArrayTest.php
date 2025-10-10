@@ -3,6 +3,8 @@
 namespace tests\Unit;
 
 use CsvManager\Facades\Csv;
+use InvalidArgumentException;
+use LogicException;
 use PHPUnit\Framework\TestCase;
 
 class CsvFromArrayTest extends TestCase
@@ -103,5 +105,101 @@ class CsvFromArrayTest extends TestCase
         }
         $result = Csv::fromArray(self::RAW_DATA, $filename);
         $this->assertFileExists($result);
+    }
+
+    /**
+     * Unitary test that try to use an invalid delimiter.
+     *
+     * @test
+     */
+    public function test_use_an_invalid_delimiter()
+    {
+        try
+        {
+            Csv::fromArray(
+                data: [],
+                delimiter: 'à'
+            );
+        } catch (InvalidArgumentException $exception)
+        {
+            $this->assertEquals("The 'delimiter' character is not allowed.", $exception->getMessage());
+        }
+    }
+
+    /**
+     * Unitary test that try to use a carriage return like delimiter.
+     *
+     * @test
+     */
+    public function test_use_a_carriage_return_like_delimiter()
+    {
+        try
+        {
+            Csv::fromArray(
+                data: [],
+                delimiter: '\r'
+            );
+        } catch (InvalidArgumentException $exception)
+        {
+            $this->assertEquals("The 'delimiter' character is not allowed.", $exception->getMessage());
+        }
+    }
+
+    /**
+     * Unitary test that try to use a newline char like delimiter.
+     *
+     * @test
+     */
+    public function test_use_a_newline_char_like_delimiter()
+    {
+        try
+        {
+            Csv::fromArray(
+                data: [],
+                delimiter: '\n'
+            );
+        } catch (InvalidArgumentException $exception)
+        {
+            $this->assertEquals("The 'delimiter' character is not allowed.", $exception->getMessage());
+        }
+    }
+
+    /**
+     * Unitary test that try to use an invalid enclosure.
+     *
+     * @test
+     */
+    public function test_use_an_invalid_enclosure()
+    {
+        try
+        {
+            Csv::fromArray(
+                data: [],
+                enclosure: 'à'
+            );
+        } catch (InvalidArgumentException $exception)
+        {
+            $this->assertEquals("The 'enclosure' character is not allowed.", $exception->getMessage());
+        }
+    }
+
+    /**
+     * Unitary test that try to use the same char for delimiter, escape and enclosure.
+     *
+     * @test
+     */
+    public function test_use_the_same_char_for_delimiter_escape_and_enclosure()
+    {
+        try
+        {
+            Csv::fromArray(
+                data: [],
+                delimiter: '\\',
+                enclosure: '\\',
+            );
+        } catch (LogicException $exception)
+        {
+            $this->assertEquals("The 'delimiter', 'enclosure', and 'escape' must be different.", $exception->getMessage());
+        }
     }
 }

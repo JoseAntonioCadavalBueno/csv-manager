@@ -35,6 +35,7 @@ class SymfonyCsv extends BaseCsv
         ?string $disk       = null
     ): string
     {
+        self::validateCsvChars($delimiter, $enclosure, '\\');
         $filename = self::generateFileName($filename);
 
         if (!is_null($disk))

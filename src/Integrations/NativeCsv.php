@@ -33,6 +33,7 @@ class NativeCsv extends BaseCsv
         ?string $disk       = null
     ): string
     {
+        self::validateCsvChars($delimiter, $enclosure, '\\');
         // In native php projects $filename must be the fullPath.
         if (is_null($filename)) {
             throw new NotFoundFileException();
