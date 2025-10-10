@@ -34,6 +34,7 @@ class LaravelCsv extends BaseCsv
         ?string $disk       = null
     ): string
     {
+        self::validateCsvChars($delimiter, $enclosure, '\\');
         $filename   = self::generateFileName($filename);
         $disk       = $disk ?? self::STORAGE_PATH;
 
