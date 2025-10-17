@@ -285,6 +285,32 @@ abstract class BaseCsv implements ICsv
         }
     }
 
+    /**
+     * Flat and normalize array data.
+     *
+     * @param array $array
+     * @return array
+     */
+    protected static function arrayFlattenAndNormalize(array $array): array
+    {
+        $result = [];
+        foreach ($array as $value)
+        {
+            if (is_array($value))
+            {
+                array_push($result, ...self::arrayFlattenAndNormalize($value));
+            } else
+            {
+                $result[] = match ($value) {
+                    is_bool($value) => $value ? 'true' : 'false',
+                    default => trim(str_replace(self::NOT_ALLOWED_CHARACTERS, ' ', stripcslashes($value))),
+                };
+            }
+        }
+
+        return $result;
+    }
+
     /* *************************** */
     /* PRIVATE HELPERS FUNCTIONS */
     /* *************************** */

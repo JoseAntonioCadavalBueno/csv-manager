@@ -52,7 +52,12 @@ class NativeCsv extends BaseCsv
 
         // Write the data on file.
         foreach ($data as $row) {
-            fputcsv($file, $row, $delimiter, $enclosure);
+            fputcsv(
+                $file,
+                self::arrayFlattenAndNormalize($row),
+                $delimiter,
+                $enclosure
+            );
         }
 
         fclose($file);

@@ -53,7 +53,11 @@ class SymfonyCsv extends BaseCsv
         $file = new SplFileObject($relativePath, 'w');
 
         foreach ($data as $row) {
-            $file->fputcsv($row, $delimiter, $enclosure);
+            $file->fputcsv(
+                self::arrayFlattenAndNormalize($row),
+                $delimiter,
+                $enclosure
+            );
         }
 
         return $relativePath;
