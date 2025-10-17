@@ -6,15 +6,17 @@ use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
 use CsvManager\Exceptions\OverflowException;
 use CsvManager\Contracts\ICsv;
+use InvalidArgumentException;
+use LogicException;
 use Throwable;
 
 abstract class BaseCsv implements ICsv
 {
     const MEMORY_LIMIT_PERCENT  = 0.8;
-    const DEFAULT_CHUNK_SIZE    = 50000;
     const DEFAULT_MEMORY_LIMIT  = 134217728;
     const CSV_EXTENSION = 'csv';
     const TXT_EXTENSION = 'txt';
+    const NOT_ALLOWED_CHARACTERS = ["\n", "\r"];
 
     const ALLOWED_EXTENSIONS = [ self::CSV_EXTENSION, self::TXT_EXTENSION ];
     const SANITIZE_REGEX = '/[^a-zA-Z0-9\/\\\\:\.\-_]/';
@@ -67,6 +69,8 @@ abstract class BaseCsv implements ICsv
         string      $escape     = '\\'
     ): array|bool
     {
+        self::validateCsvChars($delimiter, $enclosure, $escape);
+
         // Sanitize the file path to prevent unexpected results.
         $filePath   = self::sanitizeFilePath($filePath);
 
@@ -118,7 +122,7 @@ abstract class BaseCsv implements ICsv
         flock($file, LOCK_UN);
         fclose($file);
 
-        if (empty($data)) {
+        if (empty($data) && !is_null($function)) {
             return true;
         }
         return $data;
@@ -244,5 +248,84 @@ abstract class BaseCsv implements ICsv
     protected static function isValidFile(string $satinizedFilePath): bool
     {
         return file_exists($satinizedFilePath) && is_readable($satinizedFilePath);
+    }
+
+    /**
+     * Check if the csv chars are valid.
+     *
+     * @param string $delimiter
+     * @param string $enclosure
+     * @param string $escape
+     * @return void
+     */
+    protected static function validateCsvChars(
+        string $delimiter,
+        string $enclosure,
+        string $escape
+    ): void
+    {
+        if (count(array_unique([$delimiter, $enclosure, $escape], SORT_REGULAR)) !== 3)
+        {
+            throw new LogicException(LanguageManager::getMessage('errors.same_csv_chars'));
+        }
+
+        $chars = [
+            'delimiter' => $delimiter,
+            'enclosure' => $enclosure,
+            'escape'    => $escape
+        ];
+        foreach ($chars as $key => $char)
+        {
+            if (!self::isValidChar($char))
+            {
+                throw new InvalidArgumentException(
+                    sprintf(LanguageManager::getMessage('errors.invalid_csv_Char'), $key)
+                );
+            }
+        }
+    }
+
+    /**
+     * Flat and normalize array data.
+     *
+     * @param array $array
+     * @return array
+     */
+    protected static function arrayFlattenAndNormalize(array $array): array
+    {
+        $result = [];
+        foreach ($array as $value)
+        {
+            if (is_array($value))
+            {
+                array_push($result, ...self::arrayFlattenAndNormalize($value));
+            } else
+            {
+                $result[] = match ($value) {
+                    is_bool($value) => $value ? 'true' : 'false',
+                    default => trim(str_replace(self::NOT_ALLOWED_CHARACTERS, ' ', stripcslashes($value))),
+                };
+            }
+        }
+
+        return $result;
+    }
+
+    /* *************************** */
+    /* PRIVATE HELPERS FUNCTIONS */
+    /* *************************** */
+
+    /**
+     * Check if is a valid char for csv.
+     *
+     * @param string $char
+     * @return bool
+     */
+    private static function isValidChar(string $char): bool
+    {
+        // normalize single quotes to double quotes to always evaluate the byte itself
+        // and avoid misinterpretation caused by using single quotes.
+        $char = stripcslashes($char);
+        return strlen($char) === 1 && ord($char) <= 127 && !in_array($char, self::NOT_ALLOWED_CHARACTERS);
     }
 }
