@@ -128,5 +128,6 @@ test-php-8-4-symfony:
   stage: test
   image: bigestionlab/atomsk-php:php-8.4
   script:
+    - 'composer require symfony/filesystem:^7.0'
     - 'composer install'
     - 'composer test'
