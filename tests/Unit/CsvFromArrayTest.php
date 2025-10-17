@@ -22,6 +22,15 @@ class CsvFromArrayTest extends TestCase
         [5, 'User5', 25, 'Country5', 'user5@example.com', 'Sample text for large dataset.'],
     ];
 
+    const NOT_NORMALIZED_DATA = [
+        ['ID', 'Name', 'Age', 'Country', 'Email', 'Description'],
+        [1, 'User1', 18, 'Country1', "user1@\nexample.com", ['Sample text for large dataset.']],
+        [2, ['User2'], 22.48, false, '\\ruser2@example.com    ', 'Sample text for\\nlarge dataset.'],
+        [3, 'User3', 32, true, ['user3@\nexample.com'], null],
+        [4, ['  User4 ', [30, 'Country4'], ['user4@example.com', "Sample text\rfor large dataset."]]],
+        [5, "\nUser5\n", 25, [['Country5']], '\nuser5@example.com\n', ' Sample text for large dataset. '],
+    ];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -104,6 +113,42 @@ class CsvFromArrayTest extends TestCase
             $filename = self::CSV_TEST_PATH . 'native_php.txt';
         }
         $result = Csv::fromArray(self::RAW_DATA, $filename);
+        $this->assertFileExists($result);
+    }
+
+    /**
+     * Unitary test that generate a csv file from not normalized array
+     *
+     * @test
+     */
+    public function test_generate_a_csv_file_from_not_normalized_array()
+    {
+        if (class_exists('Illuminate\Support\Facades\Storage')) {
+            $filename = 'laravel_php.csv';
+        } elseif (class_exists('Symfony\Component\Filesystem\Filesystem')) {
+            $filename = 'symfony_php.csv';
+        } else {
+            $filename = self::CSV_TEST_PATH . 'native_php.csv';
+        }
+        $result = Csv::fromArray(self::NOT_NORMALIZED_DATA, $filename);
+        $this->assertFileExists($result);
+    }
+
+    /**
+     * Unitary test that generate a txt file from not normalized array
+     *
+     * @test
+     */
+    public function test_generate_a_txt_file_from_not_normalized_array()
+    {
+        if (class_exists('Illuminate\Support\Facades\Storage')) {
+            $filename = 'laravel_php.txt';
+        } elseif (class_exists('Symfony\Component\Filesystem\Filesystem')) {
+            $filename = 'symfony_php.txt';
+        } else {
+            $filename = self::CSV_TEST_PATH . 'native_php.txt';
+        }
+        $result = Csv::fromArray(self::NOT_NORMALIZED_DATA, $filename);
         $this->assertFileExists($result);
     }
 

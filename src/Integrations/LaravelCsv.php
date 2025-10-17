@@ -49,8 +49,10 @@ class LaravelCsv extends BaseCsv
         }
 
         $csvContent = '';
-        foreach ($data as $row) {
-            $csvContent .= $enclosure . implode($delimiter, $row) . $enclosure . "\n";
+        foreach ($data as $row)
+        {
+            $normalizedRow = self::arrayFlattenAndNormalize($row);
+            $csvContent .= $enclosure . implode($delimiter, $normalizedRow) . $enclosure . "\n";
         }
 
         // Save the CSV
