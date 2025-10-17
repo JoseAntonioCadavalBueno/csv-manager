@@ -37,21 +37,31 @@ You can generate a custom configuration for your environment with:
 ```
 The file looks like this:
 ```php
-    <?php
-    
-    return [
-        /*
-        | Define the language of the messages for the use of the library
-        | --------------------------------------------------------------
-        */
-        'language' => 'en',
-    
-        /*
-        | Define the allowed extensions for files
-        | --------------------------------------------------------------
-        */
-        'allowed_extensions' => 'csv,txt'
-    ];
+<?php
+
+return [
+
+    /*
+    | Define the environment config.
+    | --------------------------------------------------------------
+    | You can define a native, laravel or symfony environment config.
+    */
+    'env_config' => 'native',
+
+    /*
+    | Define the language of the messages for the use of the library
+    | --------------------------------------------------------------
+    |
+    */
+    'language' => 'en',
+
+    /*
+    | Define the allowed extensions for files.
+    | --------------------------------------------------------------
+    |
+    */
+    'allowed_extensions' => 'csv,txt'
+];
 ```
 
 ## 🛠️ Example
