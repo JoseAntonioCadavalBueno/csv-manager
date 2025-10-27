@@ -18,6 +18,7 @@ class NativeCsv extends BaseCsv
      * @param string|null   $filename
      * @param string        $delimiter
      * @param string        $enclosure
+     * @param string        $escape
      * @param string|null   $path
      * @param string|null   $disk
      * @return string
@@ -29,11 +30,12 @@ class NativeCsv extends BaseCsv
         ?string $filename   = null,
         string  $delimiter  = ',',
         string  $enclosure  = '"',
+        string  $escape     = '\\',
         ?string $path       = null,
         ?string $disk       = null
     ): string
     {
-        self::validateCsvChars($delimiter, $enclosure, '\\');
+        self::validateCsvChars($delimiter, $enclosure, $escape);
         // In native php projects $filename must be the fullPath.
         if (is_null($filename)) {
             throw new NotFoundFileException();
@@ -56,7 +58,8 @@ class NativeCsv extends BaseCsv
                 $file,
                 self::arrayFlattenAndNormalize($row),
                 $delimiter,
-                $enclosure
+                $enclosure,
+                $escape
             );
         }
 

@@ -21,6 +21,7 @@ class SymfonyCsv extends BaseCsv
      * @param string|null   $filename
      * @param string        $delimiter
      * @param string        $enclosure
+     * @param string        $escape
      * @param string|null   $path
      * @param string|null   $disk
      * @return string
@@ -31,11 +32,12 @@ class SymfonyCsv extends BaseCsv
         ?string $filename   = null,
         string  $delimiter  = ',',
         string  $enclosure  = '"',
+        string  $escape     = '\\',
         ?string $path       = null,
         ?string $disk       = null
     ): string
     {
-        self::validateCsvChars($delimiter, $enclosure, '\\');
+        self::validateCsvChars($delimiter, $enclosure, $escape);
         $filename = self::generateFileName($filename);
 
         if (!is_null($disk))
@@ -56,7 +58,8 @@ class SymfonyCsv extends BaseCsv
             $file->fputcsv(
                 self::arrayFlattenAndNormalize($row),
                 $delimiter,
-                $enclosure
+                $enclosure,
+                $escape
             );
         }
 

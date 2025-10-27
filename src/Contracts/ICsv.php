@@ -19,16 +19,19 @@ interface ICsv
      * @param string|null   $filename
      * @param string        $delimiter
      * @param string        $enclosure
+     * @param string        $escape
      * @param string|null   $path
      * @param string|null   $disk
      * @return string
-     * @throws CorruptedFileException|NotFoundFileException
+     * @throws CorruptedFileException
+     * @throws NotFoundFileException
      */
     public static function fromArray(
         array   $data,
         ?string $filename   = null,
         string  $delimiter  = ',',
         string  $enclosure  = '"',
+        string  $escape     = '\\',
         ?string $path       = null,
         ?string $disk       = null
     ): string;
