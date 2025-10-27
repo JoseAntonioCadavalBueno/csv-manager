@@ -70,6 +70,7 @@ class Csv
      * @param string|null   $filename
      * @param string        $delimiter
      * @param string        $enclosure
+     * @param string        $escape
      * @param string|null   $customPath
      * @return string
      */
@@ -78,6 +79,7 @@ class Csv
         ?string $filename   = null,
         string  $delimiter  = ',',
         string  $enclosure  = '"',
+        string  $escape     = '\\',
         ?string $customPath = null
     ): string
     {
@@ -88,6 +90,7 @@ class Csv
             $filename,
             $delimiter,
             $enclosure,
+            $escape,
             $customPath
         );
     }

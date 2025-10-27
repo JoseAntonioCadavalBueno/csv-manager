@@ -20,21 +20,24 @@ class LaravelCsv extends BaseCsv
      * @param string|null   $filename
      * @param string        $delimiter
      * @param string        $enclosure
+     * @param string        $escape
      * @param string|null   $path
      * @param string|null   $disk
      * @return string
-     * @throws CorruptedFileException|NotFoundFileException
+     * @throws CorruptedFileException
+     * @throws NotFoundFileException
      */
     public static function fromArray(
         array   $data,
         ?string $filename   = null,
         string  $delimiter  = ',',
         string  $enclosure  = '"',
+        string  $escape     = '\\',
         ?string $path       = null,
         ?string $disk       = null
     ): string
     {
-        self::validateCsvChars($delimiter, $enclosure, '\\');
+        self::validateCsvChars($delimiter, $enclosure, $escape);
         $filename   = self::generateFileName($filename);
         $disk       = $disk ?? self::STORAGE_PATH;
 
