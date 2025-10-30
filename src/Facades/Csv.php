@@ -3,6 +3,7 @@
 namespace CsvManager\Facades;
 
 use CsvManager\Contracts\ICsv;
+use CsvManager\Contracts\ISource;
 use CsvManager\Core\ConfigManager;
 use CsvManager\Core\LanguageManager;
 use CsvManager\Exceptions\CorruptedFileException;
@@ -11,6 +12,9 @@ use CsvManager\Exceptions\OverflowException;
 use CsvManager\Integrations\LaravelCsv;
 use CsvManager\Integrations\NativeCsv;
 use CsvManager\Integrations\SymfonyCsv;
+use CsvManager\Sources\StdinSource;
+use CsvManager\Sources\TrustedFylesystemSource;
+use CsvManager\Sources\UntrustedSource;
 use LogicException;
 
 class Csv
@@ -19,6 +23,8 @@ class Csv
     const SYMFONY_ENV = 'symfony';
     const NATIVE_ENV  = 'native';
     const ALLOWED_ENV_CONFIG = [self::NATIVE_ENV, self::LARAVEL_ENV, self::SYMFONY_ENV];
+
+    const UNTRUSTED_PATH_REGEX = '/\.\.|[<>:"|?*]/';
 
     /** @var ICsv $instance */
     private static ICsv $instance;
@@ -53,7 +59,7 @@ class Csv
         self::resolveInstance();
 
         return self::$instance::toArray(
-            $filePath,
+            self::resolveSource($filePath),
             $header,
             $function,
             $length,
@@ -72,7 +78,9 @@ class Csv
      * @param string        $enclosure
      * @param string        $escape
      * @param string|null   $customPath
+     * @param string|null   $disk
      * @return string
+     * @throws CorruptedFileException|NotFoundFileException
      */
     public static function fromArray(
         array   $data,
@@ -80,18 +88,26 @@ class Csv
         string  $delimiter  = ',',
         string  $enclosure  = '"',
         string  $escape     = '\\',
-        ?string $customPath = null
+        ?string $customPath = null,
+        ?string $disk       = null
     ): string
     {
         self::resolveInstance();
 
+        if (!is_null($customPath))
+        {
+            $filePath = $customPath;
+        } else
+        {
+            $filePath = $filename;
+            $filename = null;
+        }
         return self::$instance::fromArray(
             $data,
-            $filename,
+            self::resolveSource($filePath, $filename, $disk),
             $delimiter,
             $enclosure,
-            $escape,
-            $customPath
+            $escape
         );
     }
 
@@ -107,7 +123,7 @@ class Csv
     private static function resolveInstance(): void
     {
         if (!isset(self::$instance)) {
-            $env = ConfigManager::get('env_config');
+            $env = ConfigManager::get('env_config') ?? self::NATIVE_ENV;
 
             if (!in_array($env, self::ALLOWED_ENV_CONFIG))
             {
@@ -122,5 +138,28 @@ class Csv
                 self::$instance = new NativeCsv();
             }
         }
+    }
+
+    /**
+     * Detects and builds the correct source type based on environment and input.
+     *
+     * @param string        $filePath
+     * @param string|null   $filename
+     * @param string|null   $disk
+     * @return ISource
+     */
+    private static function resolveSource(string $filePath, ?string $filename = null, ?string $disk = null): ISource
+    {
+        if ($filePath === StdinSource::DEFAULT_STDIN_PATH)
+        {
+            return new StdinSource($filename, $disk);
+        }
+
+        if (preg_match(self::UNTRUSTED_PATH_REGEX, $filePath))
+        {
+            return new UntrustedSource($filePath, $filename, $disk);
+        }
+
+        return new TrustedFylesystemSource($filePath, $filename, $disk);
     }
 }
