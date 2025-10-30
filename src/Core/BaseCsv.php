@@ -2,6 +2,7 @@
 
 namespace CsvManager\Core;
 
+use CsvManager\Contracts\ISource;
 use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
 use CsvManager\Exceptions\OverflowException;
@@ -14,12 +15,8 @@ abstract class BaseCsv implements ICsv
 {
     const MEMORY_LIMIT_PERCENT  = 0.8;
     const DEFAULT_MEMORY_LIMIT  = 134217728;
-    const CSV_EXTENSION = 'csv';
-    const TXT_EXTENSION = 'txt';
-    const NOT_ALLOWED_CHARACTERS = ["\n", "\r"];
 
-    const ALLOWED_EXTENSIONS = [ self::CSV_EXTENSION, self::TXT_EXTENSION ];
-    const SANITIZE_REGEX = '/[^a-zA-Z0-9\/\\\\:\.\-_]/';
+    const NOT_ALLOWED_CHARACTERS = ["\n", "\r"];
 
     /* **************** */
     /* PUBLIC FUNCTIONS */
@@ -28,31 +25,27 @@ abstract class BaseCsv implements ICsv
     /**
      * A function that generates a CSV file from an array.
      *
-     * @param array         $data
-     * @param string|null   $filename
-     * @param string        $delimiter
-     * @param string        $enclosure
-     * @param string        $escape
-     * @param string|null   $path
-     * @param string|null   $disk
+     * @param array     $data
+     * @param ISource   $source
+     * @param string    $delimiter
+     * @param string    $enclosure
+     * @param string    $escape
      * @return string
      * @throws CorruptedFileException
      * @throws NotFoundFileException
      */
     abstract public static function fromArray(
         array   $data,
-        ?string $filename   = null,
+        ISource $source,
         string  $delimiter  = ',',
         string  $enclosure  = '"',
-        string  $escape     = '\\',
-        ?string $path       = null,
-        ?string $disk       = null
+        string  $escape     = '\\'
     ): string;
 
     /**
      * A function that processes a csv file and converts it into an array.
      *
-     * @param string        $filePath
+     * @param ISource       $source
      * @param bool          $header
      * @param callable|null $function
      * @param int|null      $length
@@ -63,7 +56,7 @@ abstract class BaseCsv implements ICsv
      * @throws OverflowException|NotFoundFileException|CorruptedFileException
      */
     public static function toArray(
-        string      $filePath,
+        ISource     $source,
         bool        $header     = false,
         ?callable   $function   = null,
         ?int        $length     = null,
@@ -74,17 +67,11 @@ abstract class BaseCsv implements ICsv
     {
         self::validateCsvChars($delimiter, $enclosure, $escape);
 
-        // Sanitize the file path to prevent unexpected results.
-        $filePath   = self::sanitizeFilePath($filePath);
-
-        if (!self::isValidFile($filePath))
-        {
-            throw new NotFoundFileException(null);
-        }
+        $source->validate();
 
         try
         {
-            $file = fopen($filePath, 'r');
+            $file = fopen($source->getFullPath(), 'r');
         } catch (Throwable $exception)
         {
             // If the file cannot be opened, return a CorruptedFileException.
@@ -92,7 +79,6 @@ abstract class BaseCsv implements ICsv
         }
 
         $data = [];
-
         // Shared read lock.
         flock($file, LOCK_SH);
 
@@ -100,7 +86,7 @@ abstract class BaseCsv implements ICsv
         {
             // If is necessary have callable and is not included,
             // return a OverflowException because we cannot process the file.
-            if (self::fileSizeExceedsMemoryLimit($filePath) && is_null($function))
+            if (self::fileSizeExceedsMemoryLimit($source->getFullPath()) && is_null($function))
             {
                 throw new OverflowException();
             }
@@ -125,10 +111,7 @@ abstract class BaseCsv implements ICsv
         flock($file, LOCK_UN);
         fclose($file);
 
-        if (empty($data) && !is_null($function)) {
-            return true;
-        }
-        return $data;
+        return empty($data) && !is_null($function) ? true : $data;
     }
 
     /* *************************** */
@@ -166,91 +149,6 @@ abstract class BaseCsv implements ICsv
         // Calculate the free memory, save it in the static variable and return it.
         $usedMemory = memory_get_usage(true);
         return $memoryLimit - $usedMemory;
-    }
-
-    /**
-     * Function that sanitizes the $filePath variable to avoid unexpected results.
-     *
-     * @param string $filePath
-     * @return string
-     * @throws CorruptedFileException
-     */
-    protected static function sanitizeFilePath(string $filePath): string
-    {
-        $satinizedFilePath = preg_replace(self::SANITIZE_REGEX, '', $filePath);
-
-        if ($filePath !== $satinizedFilePath)
-        {
-            throw new CorruptedFileException();
-        }
-
-        // Extract the extension's file.
-        $extension = pathinfo($satinizedFilePath, PATHINFO_EXTENSION);
-        $allowedExtensions = ConfigManager::get('allowed_extensions', self::ALLOWED_EXTENSIONS);
-        $allowedExtensions = is_string($allowedExtensions)
-            ? explode(',', $allowedExtensions)
-            : $allowedExtensions;
-
-        // If the extension's file is not allowed extension, throw a CorruptedFileException.
-        if (empty($extension) || !in_array(strtolower($extension), $allowedExtensions))
-        {
-            throw new CorruptedFileException(LanguageManager::getMessage('errors.corrupt_2'));
-        }
-
-        return $satinizedFilePath;
-    }
-
-    /**
-     * Function that sanitizes the $filename variable to avoid unexpected results.
-     *
-     * @param string $filename
-     * @return string
-     */
-    protected static function sanitizeFileName(string $filename): string
-    {
-        return preg_replace(self::SANITIZE_REGEX, '', $filename);
-    }
-
-    /**
-     * Function that generate a fileName.
-     *
-     * @param   string|null $filename
-     * @return  string
-     * @throws  CorruptedFileException
-     */
-    protected static function generateFileName(?string $filename = null): string
-    {
-        if (!is_null($filename))
-        {
-            // Extract the extension's file.
-            $extension = pathinfo($filename, PATHINFO_EXTENSION);
-            if (!empty($extension))
-            {
-                $allowedExtensions = ConfigManager::get('allowed_extensions', self::ALLOWED_EXTENSIONS);
-                $allowedExtensions = is_string($allowedExtensions)
-                    ? explode(',', $allowedExtensions)
-                    : $allowedExtensions;
-
-                if (!in_array($extension, $allowedExtensions))
-                {
-                    throw new CorruptedFileException(LanguageManager::getMessage('errors.corrupt_2'));
-                }
-                return $filename;
-            }
-            return $filename . '.' . self::CSV_EXTENSION;
-        }
-        return self::CSV_EXTENSION . '_' . uniqid() . '.' . self::CSV_EXTENSION;
-    }
-
-    /**
-     * Check if exist and is valid file.
-     *
-     * @param string $satinizedFilePath
-     * @return bool
-     */
-    protected static function isValidFile(string $satinizedFilePath): bool
-    {
-        return file_exists($satinizedFilePath) && is_readable($satinizedFilePath);
     }
 
     /**
@@ -306,7 +204,7 @@ abstract class BaseCsv implements ICsv
             {
                 $result[] = match ($value) {
                     is_bool($value) => $value ? 'true' : 'false',
-                    default => trim(str_replace(self::NOT_ALLOWED_CHARACTERS, ' ', stripcslashes($value))),
+                    default => trim(str_replace(self::NOT_ALLOWED_CHARACTERS, ' ', stripcslashes($value ?? ''))),
                 };
             }
         }
@@ -314,9 +212,9 @@ abstract class BaseCsv implements ICsv
         return $result;
     }
 
-    /* *************************** */
+    /* ************************* */
     /* PRIVATE HELPERS FUNCTIONS */
-    /* *************************** */
+    /* ************************* */
 
     /**
      * Check if is a valid char for csv.

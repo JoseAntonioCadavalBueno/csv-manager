@@ -307,16 +307,12 @@ class CsvToArrayTest extends TestCase
     {
         foreach (self::MALICIOUS_INPUTS as $maliciousInput) {
             try {
-                $result = Csv::toArray(realpath(self::CSV_TEST_PATH) . DIRECTORY_SEPARATOR . $maliciousInput);
+                $result = Csv::toArray(realpath(self::CSV_TEST_PATH)
+                    . DIRECTORY_SEPARATOR . '..;' . DIRECTORY_SEPARATOR
+                    . '..' . DIRECTORY_SEPARATOR . $maliciousInput);
             } catch (CorruptedFileException $exception) {
                 $this->assertEquals(415, $exception->getCode());
-                if($maliciousInput === 'php://input')
-                {
-                    $this->assertEquals(LanguageManager::getMessage('errors.corrupt_2'), $exception->getMessage());
-                } else
-                {
-                    $this->assertEquals(LanguageManager::getMessage('errors.corrupt'), $exception->getMessage());
-                }
+                $this->assertEquals(LanguageManager::getMessage('errors.corrupt'), $exception->getMessage());
             }
         }
     }

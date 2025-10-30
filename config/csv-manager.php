@@ -21,5 +21,12 @@ return [
     | --------------------------------------------------------------
     |
     */
-    'allowed_extensions' => 'csv,txt'
+    'allowed_extensions'    =>  ['csv','txt'],
+
+    /*
+    | Whitelist of allowed paths.
+    | --------------------------------------------------------------
+    | Includes php temp dir and the repository's base path.
+    */
+    'extra_allowed_paths'   =>  []
 ];

@@ -41,6 +41,11 @@ class ConfigManager
      */
     public static function get(string $key, mixed $default = null): mixed
     {
-        return self::getConfig()[$key] ?? $default;
+        $value = self::getConfig()[$key] ?? $default;
+        if ($key === 'allowed_extensions' && is_string($value))
+        {
+            $value = array_map('trim', explode(',', $value));
+        }
+        return $value;
     }
 }
