@@ -16,6 +16,7 @@ use CsvManager\Sources\StdinSource;
 use CsvManager\Sources\TrustedFylesystemSource;
 use CsvManager\Sources\UntrustedSource;
 use LogicException;
+use src\Exceptions\InvalidConfigurationException;
 
 class Csv
 {
@@ -119,15 +120,17 @@ class Csv
      * Configure the correct integration for ICsv.
      *
      * @return void
+     * @throws InvalidConfigurationException
      */
     private static function resolveInstance(): void
     {
-        if (!isset(self::$instance)) {
+        if (!isset(self::$instance))
+        {
             $env = ConfigManager::get('env_config') ?? self::NATIVE_ENV;
 
             if (!in_array($env, self::ALLOWED_ENV_CONFIG))
             {
-                throw new LogicException(LanguageManager::getMessage('errors.illegal_env'));
+                throw new InvalidConfigurationException();
             }
 
             if ($env === self::LARAVEL_ENV && class_exists('Illuminate\Support\Facades\Storage')) {
@@ -137,6 +140,11 @@ class Csv
             } else {
                 self::$instance = new NativeCsv();
             }
+        }
+
+        if (!isset(self::$instance))
+        {
+            throw new InvalidConfigurationException();
         }
     }
 
