@@ -82,15 +82,15 @@ abstract class BaseCsv implements ICsv
         // Shared read lock.
         flock($file, LOCK_SH);
 
+        // If is necessary have callable and is not included,
+        // return a OverflowException because we cannot process the file.
+        if (self::fileSizeExceedsMemoryLimit($source->getFullPath()) && is_null($function))
+        {
+            throw new OverflowException();
+        }
+
         while (($row = fgetcsv($file, $length, $delimiter, $enclosure, $escape)) !== false)
         {
-            // If is necessary have callable and is not included,
-            // return a OverflowException because we cannot process the file.
-            if (self::fileSizeExceedsMemoryLimit($source->getFullPath()) && is_null($function))
-            {
-                throw new OverflowException();
-            }
-
             // If header is true, jump to the next row.
             if ($header)
             {
