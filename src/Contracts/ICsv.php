@@ -13,26 +13,6 @@ interface ICsv
     /* **************** */
 
     /**
-     * A function that generates a CSV file from an array.
-     *
-     * @param array         $data
-     * @param ISource       $source
-     * @param string        $delimiter
-     * @param string        $enclosure
-     * @param string        $escape
-     * @return string
-     * @throws CorruptedFileException
-     * @throws NotFoundFileException
-     */
-    public static function fromArray(
-        array   $data,
-        ISource $source,
-        string  $delimiter  = ',',
-        string  $enclosure  = '"',
-        string  $escape     = '\\'
-    ): string;
-
-    /**
      * A function that processes a csv file and converts it into an array.
      *
      * @param ISource       $source
