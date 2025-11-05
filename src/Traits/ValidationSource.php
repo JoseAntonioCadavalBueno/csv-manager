@@ -24,8 +24,7 @@ trait ValidationSource
      */
     protected static function isFilePathClean(string $filePath, string $regex): bool
     {
-        $result = preg_match($regex, $filePath) === 1;
-        return $result;
+        return preg_match($regex, $filePath) === 1;
     }
 
     /**

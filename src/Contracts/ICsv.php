@@ -27,7 +27,7 @@ interface ICsv
      * @throws NotFoundFileException
      * @throws CorruptedFileException
      */
-    public static function toArray(
+    public function toArray(
         ISource     $source,
         bool        $header     = false,
         ?callable   $function   = null,

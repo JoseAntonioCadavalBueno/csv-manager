@@ -13,10 +13,12 @@ class StdinSource implements ISource
 
     const DEFAULT_STDIN_PATH = 'php://stdin';
 
+    protected LanguageManager $language;
     private ?string $filename;
     private ?string $disk;
-    public function __construct(?string $filename = null, ?string $disk = null)
+    public function __construct(LanguageManager $language, ?string $filename = null, ?string $disk = null)
     {
+        $this->language = $language;
         $this->disk     = $disk;
         $this->filename = $filename;
     }
@@ -70,14 +72,14 @@ class StdinSource implements ISource
      */
     public function validate(bool $fileMustExist = true): void
     {
-        if (!is_null($this->filename) && !static::isFilenameClean($this->filename, UntrustedSource::SANITIZE_REGEX))
+        if (!is_null($this->filename) && !static::isFilePathClean($this->filename, UntrustedSource::PATH_SANITIZE_REGEX))
         {
-            throw new CorruptedFileException(LanguageManager::getMessage('errors.corrupt'));
+            throw new CorruptedFileException($this->language->getMessage('errors.corrupt'));
         }
 
         if (!is_null($this->filename))
         {
-            $this->filename = $this->getSanitizedFilename($this->filename, UntrustedSource::SANITIZE_REGEX);
+            $this->filename = $this->getSanitizedFilename($this->filename, UntrustedSource::PATH_SANITIZE_REGEX);
         }
     }
 }
