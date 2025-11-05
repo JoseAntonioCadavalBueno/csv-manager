@@ -10,6 +10,12 @@ class LanguageManager
     const LOCALE_PATH = self::BASE_PATH . 'locales'
         . DIRECTORY_SEPARATOR . '%s.php';
 
+    protected ConfigManager $config;
+    public function __construct(ConfigManager $config)
+    {
+        $this->config = $config;
+    }
+
     /* **************** */
     /* PUBLIC FUNCTIONS */
     /* **************** */
@@ -20,9 +26,9 @@ class LanguageManager
      * @param string $key
      * @return string
      */
-    public static function getMessage(string $key): string
+    public function getMessage(string $key): string
     {
-        $language = ConfigManager::get('language', 'en');
+        $language = $this->config->get('language', 'en');
 
         $langFile = sprintf(self::LOCALE_PATH, $language);
         $messages = include $langFile;

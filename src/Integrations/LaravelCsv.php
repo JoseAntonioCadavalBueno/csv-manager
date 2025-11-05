@@ -23,7 +23,7 @@ class LaravelCsv extends BaseCsv
      * @return string
      * @throws CorruptedFileException|NotFoundFileException
      */
-    public static function fromArray(
+    public function fromArray(
         array   $data,
         ISource $source,
         string  $delimiter  = ',',
@@ -31,7 +31,7 @@ class LaravelCsv extends BaseCsv
         string  $escape     = '\\'
     ): string
     {
-        self::validateCsvChars($delimiter, $enclosure, $escape);
+        $this->validateCsvChars($delimiter, $enclosure, $escape);
 
         $source->validate(false);
 

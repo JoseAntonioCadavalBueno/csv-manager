@@ -15,11 +15,19 @@ use CsvManager\Integrations\SymfonyCsv;
 use CsvManager\Sources\StdinSource;
 use CsvManager\Sources\TrustedFylesystemSource;
 use CsvManager\Sources\UntrustedSource;
-use LogicException;
 use src\Exceptions\InvalidConfigurationException;
 
 class Csv
 {
+    const BASE_PATH = __DIR__ . DIRECTORY_SEPARATOR . '..'
+    . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
+
+    const DEFAULT_CONFIG_PATH   = self::BASE_PATH . 'config' . DIRECTORY_SEPARATOR . 'csv-manager.php';
+    const CUSTOM_CONFIG_PATH    = self::BASE_PATH . '..'
+        . DIRECTORY_SEPARATOR . '..'
+        . DIRECTORY_SEPARATOR . 'config'
+        . DIRECTORY_SEPARATOR . 'csv-manager.php';
+
     const LARAVEL_ENV = 'laravel';
     const SYMFONY_ENV = 'symfony';
     const NATIVE_ENV  = 'native';
@@ -27,8 +35,9 @@ class Csv
 
     const UNTRUSTED_PATH_REGEX = '/\.\.|[<>:"|?*]/';
 
-    /** @var ICsv $instance */
     private static ICsv $instance;
+    private static ConfigManager $config;
+    private static LanguageManager $language;
 
     /* **************** */
     /* PUBLIC FUNCTIONS */
@@ -45,7 +54,7 @@ class Csv
      * @param string        $enclosure
      * @param string        $escape
      * @return array|bool
-     * @throws CorruptedFileException|NotFoundFileException|OverflowException
+     * @throws CorruptedFileException|NotFoundFileException|OverflowException|InvalidConfigurationException
      */
     public static function toArray(
         string      $filePath,
@@ -59,7 +68,7 @@ class Csv
     {
         self::resolveInstance();
 
-        return self::$instance::toArray(
+        return self::$instance->toArray(
             self::resolveSource($filePath),
             $header,
             $function,
@@ -81,7 +90,7 @@ class Csv
      * @param string|null   $customPath
      * @param string|null   $disk
      * @return string
-     * @throws CorruptedFileException|NotFoundFileException
+     * @throws CorruptedFileException|NotFoundFileException|InvalidConfigurationException
      */
     public static function fromArray(
         array   $data,
@@ -103,7 +112,7 @@ class Csv
             $filePath = $filename;
             $filename = null;
         }
-        return self::$instance::fromArray(
+        return self::$instance->fromArray(
             $data,
             self::resolveSource($filePath, $filename, $disk),
             $delimiter,
@@ -126,26 +135,42 @@ class Csv
     {
         if (!isset(self::$instance))
         {
-            $env = ConfigManager::get('env_config') ?? self::NATIVE_ENV;
+            self::resolveConfig();
+            $env = self::$config->get('env_config') ?? self::NATIVE_ENV;
 
             if (!in_array($env, self::ALLOWED_ENV_CONFIG))
             {
-                throw new InvalidConfigurationException();
+                throw new InvalidConfigurationException(self::$language->getMessage('errors.illegal_env'));
             }
 
             if ($env === self::LARAVEL_ENV && class_exists('Illuminate\Support\Facades\Storage')) {
-                self::$instance = new LaravelCsv();
+                self::$instance = new LaravelCsv(self::$language);
             } elseif ($env === self::SYMFONY_ENV && class_exists('Symfony\Component\Filesystem\Filesystem')) {
-                self::$instance = new SymfonyCsv();
+                self::$instance = new SymfonyCsv(self::$language);
             } else {
-                self::$instance = new NativeCsv();
+                self::$instance = new NativeCsv(self::$language);
             }
         }
 
         if (!isset(self::$instance))
         {
-            throw new InvalidConfigurationException();
+            throw new InvalidConfigurationException(self::$language->getMessage('errors.illegal_env'));
         }
+    }
+
+    /**
+     * Configure the correct language and config for this facade.
+     *
+     * @return void
+     */
+    private static function resolveConfig(): void
+    {
+        $config = file_exists(self::CUSTOM_CONFIG_PATH)
+            ? require self::CUSTOM_CONFIG_PATH
+            : require self::DEFAULT_CONFIG_PATH;
+
+        self::$config   = new ConfigManager($config);
+        self::$language = new LanguageManager(self::$config);
     }
 
     /**
@@ -160,14 +185,14 @@ class Csv
     {
         if ($filePath === StdinSource::DEFAULT_STDIN_PATH)
         {
-            return new StdinSource($filename, $disk);
+            return new StdinSource(self::$language, $filename, $disk);
         }
 
         if (preg_match(self::UNTRUSTED_PATH_REGEX, $filePath))
         {
-            return new UntrustedSource($filePath, $filename, $disk);
+            return new UntrustedSource(self::$config, self::$language, $filePath, $filename, $disk);
         }
 
-        return new TrustedFylesystemSource($filePath, $filename, $disk);
+        return new TrustedFylesystemSource(self::$config, self::$language, $filePath, $filename, $disk);
     }
 }

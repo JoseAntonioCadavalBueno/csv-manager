@@ -18,6 +18,12 @@ abstract class BaseCsv implements ICsv
 
     const NOT_ALLOWED_CHARACTERS = ["\n", "\r"];
 
+    protected LanguageManager $language;
+    public function __construct(LanguageManager $language)
+    {
+        $this->language = $language;
+    }
+
     /* **************** */
     /* PUBLIC FUNCTIONS */
     /* **************** */
@@ -34,7 +40,7 @@ abstract class BaseCsv implements ICsv
      * @throws CorruptedFileException
      * @throws NotFoundFileException
      */
-    abstract public static function fromArray(
+    abstract public function fromArray(
         array   $data,
         ISource $source,
         string  $delimiter  = ',',
@@ -55,7 +61,7 @@ abstract class BaseCsv implements ICsv
      * @return array|bool
      * @throws OverflowException|NotFoundFileException|CorruptedFileException
      */
-    public static function toArray(
+    public function toArray(
         ISource     $source,
         bool        $header     = false,
         ?callable   $function   = null,
@@ -75,7 +81,7 @@ abstract class BaseCsv implements ICsv
         } catch (Throwable $exception)
         {
             // If the file cannot be opened, return a CorruptedFileException.
-            throw new CorruptedFileException(previous: $exception);
+            throw new CorruptedFileException(message: $this->language->getMessage('errors.corrupt'), previous: $exception);
         }
 
         $data = [];
@@ -86,7 +92,7 @@ abstract class BaseCsv implements ICsv
         // return a OverflowException because we cannot process the file.
         if (self::fileSizeExceedsMemoryLimit($source->getFullPath()) && is_null($function))
         {
-            throw new OverflowException();
+            throw new OverflowException($this->language->getMessage('errors.overflow'));
         }
 
         while (($row = fgetcsv($file, $length, $delimiter, $enclosure, $escape)) !== false)
@@ -159,7 +165,7 @@ abstract class BaseCsv implements ICsv
      * @param string $escape
      * @return void
      */
-    protected static function validateCsvChars(
+    protected function validateCsvChars(
         string $delimiter,
         string $enclosure,
         string $escape
@@ -167,7 +173,7 @@ abstract class BaseCsv implements ICsv
     {
         if (count(array_unique([$delimiter, $enclosure, $escape], SORT_REGULAR)) !== 3)
         {
-            throw new LogicException(LanguageManager::getMessage('errors.same_csv_chars'));
+            throw new LogicException($this->language->getMessage('errors.same_csv_chars'));
         }
 
         $chars = [
@@ -180,7 +186,7 @@ abstract class BaseCsv implements ICsv
             if (!self::isValidChar($char))
             {
                 throw new InvalidArgumentException(
-                    sprintf(LanguageManager::getMessage('errors.invalid_csv_Char'), $key)
+                    sprintf($this->language->getMessage('errors.invalid_csv_Char'), $key)
                 );
             }
         }

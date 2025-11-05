@@ -17,13 +17,18 @@ class TrustedFylesystemSource implements ISource
     const TXT_EXTENSION = 'txt';
     const DEFAULT_ALLOWED_EXTENSIONS = [self::CSV_EXTENSION, self::TXT_EXTENSION];
 
+    protected ConfigManager $config;
+    protected LanguageManager $language;
     private string  $filePath;
     private string  $filename;
     private ?string $disk;
 
-    public function __construct(string $filePath, ?string $filename = null, ?string $disk = null)
+    public function __construct(ConfigManager $config, LanguageManager $language, string $filePath, ?string $filename = null, ?string $disk = null)
     {
-        $this->disk = $disk;
+        $this->config   = $config;
+        $this->language = $language;
+        $this->disk     = $disk;
+
         if (!is_null($filename))
         {
             $this->filePath = rtrim($filePath, DIRECTORY_SEPARATOR);
@@ -89,14 +94,14 @@ class TrustedFylesystemSource implements ISource
      */
     public function validate(bool $fileMustExist = true): void
     {
-        if (!static::isAllowedExtension($this->filename, ConfigManager::get('allowed_extensions', self::DEFAULT_ALLOWED_EXTENSIONS)))
+        if (!static::isAllowedExtension($this->filename, $this->config->get('allowed_extensions', self::DEFAULT_ALLOWED_EXTENSIONS)))
         {
-            throw new CorruptedFileException(LanguageManager::getMessage('errors.corrupt_2'));
+            throw new CorruptedFileException($this->language->getMessage('errors.corrupt_2'));
         }
 
         if ($fileMustExist && !static::isReadableFile($this->getFullPath()))
         {
-            throw new NotFoundFileException(null);
+            throw new NotFoundFileException($this->language->getMessage('errors.not_found'));
         }
     }
 }
