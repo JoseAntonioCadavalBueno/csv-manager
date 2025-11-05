@@ -9,7 +9,7 @@ use CsvManager\Exceptions\NotFoundFileException;
 use SplFileObject;
 use Symfony\Component\Filesystem\Filesystem;
 
-class SymfonyCsv extends BaseCsv
+final class SymfonyCsv extends BaseCsv
 {
     /**
      * A function that generates a CSV file from an array.
@@ -41,7 +41,7 @@ class SymfonyCsv extends BaseCsv
 
         foreach ($data as $row) {
             $file->fputcsv(
-                self::arrayFlattenAndNormalize($row),
+                self::arrayFlattenAndNormalize($row, self::NOT_ALLOWED_CHARACTERS),
                 $delimiter,
                 $enclosure,
                 $escape

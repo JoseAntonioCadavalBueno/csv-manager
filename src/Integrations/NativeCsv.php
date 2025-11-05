@@ -7,7 +7,7 @@ use CsvManager\Core\BaseCsv;
 use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
 
-class NativeCsv extends BaseCsv
+final class NativeCsv extends BaseCsv
 {
     /**
      * A function that generates a CSV file from an array.
@@ -40,7 +40,7 @@ class NativeCsv extends BaseCsv
         foreach ($data as $row) {
             fputcsv(
                 $file,
-                self::arrayFlattenAndNormalize($row),
+                self::arrayFlattenAndNormalize($row, self::NOT_ALLOWED_CHARACTERS),
                 $delimiter,
                 $enclosure,
                 $escape

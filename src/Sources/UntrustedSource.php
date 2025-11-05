@@ -7,11 +7,11 @@ use CsvManager\Core\ConfigManager;
 use CsvManager\Core\LanguageManager;
 use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
-use CsvManager\Traits\ValidationSource;
+use CsvManager\Traits\SourceValidator;
 
 class UntrustedSource implements ISource
 {
-    use ValidationSource;
+    use SourceValidator;
 
     const PATH_SANITIZE_REGEX = '/^[\p{L}\p{N}\.\-_ :\/\\\\]+$/u';
 

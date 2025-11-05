@@ -8,7 +8,7 @@ use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
 use Illuminate\Support\Facades\Storage;
 
-class LaravelCsv extends BaseCsv
+final class LaravelCsv extends BaseCsv
 {
     const STORAGE_PATH  = 'public';
 
@@ -42,7 +42,7 @@ class LaravelCsv extends BaseCsv
         {
             fputcsv(
                 $stream,
-                self::arrayFlattenAndNormalize($row),
+                self::arrayFlattenAndNormalize($row, self::NOT_ALLOWED_CHARACTERS),
                 $delimiter,
                 $enclosure,
                 $escape
