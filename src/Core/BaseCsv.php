@@ -7,21 +7,23 @@ use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
 use CsvManager\Exceptions\OverflowException;
 use CsvManager\Contracts\ICsv;
+use CsvManager\Traits\CsvValidator;
 use InvalidArgumentException;
 use LogicException;
 use Throwable;
 
 abstract class BaseCsv implements ICsv
 {
-    const MEMORY_LIMIT_PERCENT  = 0.8;
-    const DEFAULT_MEMORY_LIMIT  = 134217728;
+    use CsvValidator;
 
     const NOT_ALLOWED_CHARACTERS = ["\n", "\r"];
 
     protected LanguageManager $language;
+    protected MemoryInspector $memoryInspector;
     public function __construct(LanguageManager $language)
     {
-        $this->language = $language;
+        $this->language         = $language;
+        $this->memoryInspector  = self::instanceMemoryInspector();
     }
 
     /* **************** */
@@ -90,7 +92,7 @@ abstract class BaseCsv implements ICsv
 
         // If is necessary have callable and is not included,
         // return a OverflowException because we cannot process the file.
-        if (self::fileSizeExceedsMemoryLimit($source->getFullPath()) && is_null($function))
+        if ($this->memoryInspector->fileSizeExceedsMemoryLimit($source->getFullPath()) && is_null($function))
         {
             throw new OverflowException($this->language->getMessage('errors.overflow'));
         }
@@ -125,39 +127,6 @@ abstract class BaseCsv implements ICsv
     /* *************************** */
 
     /**
-     * Boolean function that determines if the file size
-     * is larger than the calculated percentage of php memory limit.
-     *
-     * @param string $filePath
-     * @return bool
-     */
-    protected static function fileSizeExceedsMemoryLimit(string $filePath): bool
-    {
-        // The unit of measurement always in bytes.
-        $fileSize = filesize($filePath);
-
-        // If the file size is larger than the calculated percentage of php memory limit we return true.
-        return $fileSize > self::calculateFreeMemory() * self::MEMORY_LIMIT_PERCENT;
-    }
-
-    /**
-     * Function that calculates free memory at this point.
-     *
-     * @return int
-     */
-    protected static function calculateFreeMemory(): int
-    {
-        // The unit of measurement always in bytes.
-        $memoryLimit = function_exists('ini_get')
-            ? intval(ini_get('memory_limit')) * 1024 * 1024
-            : self::DEFAULT_MEMORY_LIMIT;
-
-        // Calculate the free memory, save it in the static variable and return it.
-        $usedMemory = memory_get_usage(true);
-        return $memoryLimit - $usedMemory;
-    }
-
-    /**
      * Check if the csv chars are valid.
      *
      * @param string $delimiter
@@ -183,7 +152,7 @@ abstract class BaseCsv implements ICsv
         ];
         foreach ($chars as $key => $char)
         {
-            if (!self::isValidChar($char))
+            if (!self::isValidChar($char, self::NOT_ALLOWED_CHARACTERS))
             {
                 throw new InvalidArgumentException(
                     sprintf($this->language->getMessage('errors.invalid_csv_Char'), $key)
@@ -192,47 +161,17 @@ abstract class BaseCsv implements ICsv
         }
     }
 
-    /**
-     * Flat and normalize array data.
-     *
-     * @param array $array
-     * @return array
-     */
-    protected static function arrayFlattenAndNormalize(array $array): array
-    {
-        $result = [];
-        foreach ($array as $value)
-        {
-            if (is_array($value))
-            {
-                array_push($result, ...self::arrayFlattenAndNormalize($value));
-            } else
-            {
-                $result[] = match ($value) {
-                    is_bool($value) => $value ? 'true' : 'false',
-                    default => trim(str_replace(self::NOT_ALLOWED_CHARACTERS, ' ', stripcslashes($value ?? ''))),
-                };
-            }
-        }
-
-        return $result;
-    }
-
-    /* ************************* */
-    /* PRIVATE HELPERS FUNCTIONS */
-    /* ************************* */
+    /* ************************ */
+    /* PRIVATE HELPER FUNCTIONS */
+    /* ************************ */
 
     /**
-     * Check if is a valid char for csv.
+     * Instance MemoryInspector.
      *
-     * @param string $char
-     * @return bool
+     * @return MemoryInspector
      */
-    private static function isValidChar(string $char): bool
+    private static function instanceMemoryInspector(): MemoryInspector
     {
-        // normalize single quotes to double quotes to always evaluate the byte itself
-        // and avoid misinterpretation caused by using single quotes.
-        $char = stripcslashes($char);
-        return strlen($char) === 1 && ord($char) <= 127 && !in_array($char, self::NOT_ALLOWED_CHARACTERS);
+        return new MemoryInspector();
     }
 }

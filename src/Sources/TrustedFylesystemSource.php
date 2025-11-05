@@ -7,11 +7,11 @@ use CsvManager\Core\ConfigManager;
 use CsvManager\Core\LanguageManager;
 use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
-use CsvManager\Traits\ValidationSource;
+use CsvManager\Traits\SourceValidator;
 
 class TrustedFylesystemSource implements ISource
 {
-    use ValidationSource;
+    use SourceValidator;
 
     const CSV_EXTENSION = 'csv';
     const TXT_EXTENSION = 'txt';

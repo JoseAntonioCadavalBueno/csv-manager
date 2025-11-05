@@ -2,7 +2,7 @@
 
 namespace CsvManager\Traits;
 
-trait ValidationSource
+trait SourceValidator
 {
     /**
      * Check if exist and is valid file.

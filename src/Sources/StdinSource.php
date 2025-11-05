@@ -5,11 +5,11 @@ namespace CsvManager\Sources;
 use CsvManager\Contracts\ISource;
 use CsvManager\Core\LanguageManager;
 use CsvManager\Exceptions\CorruptedFileException;
-use CsvManager\Traits\ValidationSource;
+use CsvManager\Traits\SourceValidator;
 
 class StdinSource implements ISource
 {
-    use ValidationSource;
+    use SourceValidator;
 
     const DEFAULT_STDIN_PATH = 'php://stdin';
 
