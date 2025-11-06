@@ -6,6 +6,7 @@ return [
     | Define the environment config.
     | --------------------------------------------------------------
     | You can define a native, laravel or symfony environment config.
+    | Warning: Support for the symfony environment has been deprecated.
     */
     'env_config' => 'native',
 
