@@ -34,6 +34,10 @@ class ConfigManager
         // For retro-compatibility with ver. 1.2.0
         if ($key === 'allowed_extensions' && is_string($value))
         {
+            @trigger_error(
+                'Passing "allowed_extensions" as a string is deprecated; pass it as an array instead.',
+                E_USER_DEPRECATED
+            );
             $value = array_map('trim', explode(',', $value));
         }
         return $value;

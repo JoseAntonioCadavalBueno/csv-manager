@@ -143,11 +143,18 @@ class Csv
                 throw new InvalidConfigurationException(self::$language->getMessage('errors.illegal_env'));
             }
 
-            if ($env === self::LARAVEL_ENV && class_exists('Illuminate\Support\Facades\Storage')) {
+            if ($env === self::LARAVEL_ENV && class_exists('Illuminate\Support\Facades\Storage'))
+            {
                 self::$instance = new LaravelCsv(self::$language);
-            } elseif ($env === self::SYMFONY_ENV && class_exists('Symfony\Component\Filesystem\Filesystem')) {
+            } elseif ($env === self::SYMFONY_ENV && class_exists('Symfony\Component\Filesystem\Filesystem'))
+            {
+                @trigger_error(
+                    'Support for the Symfony environment is deprecated; use the Laravel or Native environment instead.',
+                    E_USER_DEPRECATED
+                );
                 self::$instance = new SymfonyCsv(self::$language);
-            } else {
+            } else
+            {
                 self::$instance = new NativeCsv(self::$language);
             }
         }
