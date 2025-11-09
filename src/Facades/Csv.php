@@ -3,6 +3,7 @@
 namespace CsvManager\Facades;
 
 use CsvManager\Contracts\ICsv;
+use CsvManager\Contracts\ISource;
 use CsvManager\Core\ConfigManager;
 use CsvManager\Core\LanguageManager;
 use CsvManager\Exceptions\CorruptedFileException;
@@ -11,17 +12,32 @@ use CsvManager\Exceptions\OverflowException;
 use CsvManager\Integrations\LaravelCsv;
 use CsvManager\Integrations\NativeCsv;
 use CsvManager\Integrations\SymfonyCsv;
-use LogicException;
+use CsvManager\Sources\StdinSource;
+use CsvManager\Sources\TrustedFylesystemSource;
+use CsvManager\Sources\UntrustedSource;
+use src\Exceptions\InvalidConfigurationException;
 
 class Csv
 {
+    const BASE_PATH = __DIR__ . DIRECTORY_SEPARATOR . '..'
+    . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
+
+    const DEFAULT_CONFIG_PATH   = self::BASE_PATH . 'config' . DIRECTORY_SEPARATOR . 'csv-manager.php';
+    const CUSTOM_CONFIG_PATH    = self::BASE_PATH . '..'
+        . DIRECTORY_SEPARATOR . '..'
+        . DIRECTORY_SEPARATOR . 'config'
+        . DIRECTORY_SEPARATOR . 'csv-manager.php';
+
     const LARAVEL_ENV = 'laravel';
     const SYMFONY_ENV = 'symfony';
     const NATIVE_ENV  = 'native';
     const ALLOWED_ENV_CONFIG = [self::NATIVE_ENV, self::LARAVEL_ENV, self::SYMFONY_ENV];
 
-    /** @var ICsv $instance */
+    const UNTRUSTED_PATH_REGEX = '/\.\.|[<>:"|?*]/';
+
     private static ICsv $instance;
+    private static ConfigManager $config;
+    private static LanguageManager $language;
 
     /* **************** */
     /* PUBLIC FUNCTIONS */
@@ -38,7 +54,7 @@ class Csv
      * @param string        $enclosure
      * @param string        $escape
      * @return array|bool
-     * @throws CorruptedFileException|NotFoundFileException|OverflowException
+     * @throws CorruptedFileException|NotFoundFileException|OverflowException|InvalidConfigurationException
      */
     public static function toArray(
         string      $filePath,
@@ -52,8 +68,8 @@ class Csv
     {
         self::resolveInstance();
 
-        return self::$instance::toArray(
-            $filePath,
+        return self::$instance->toArray(
+            self::resolveSource($filePath),
             $header,
             $function,
             $length,
@@ -70,25 +86,38 @@ class Csv
      * @param string|null   $filename
      * @param string        $delimiter
      * @param string        $enclosure
+     * @param string        $escape
      * @param string|null   $customPath
+     * @param string|null   $disk
      * @return string
+     * @throws CorruptedFileException|NotFoundFileException|InvalidConfigurationException
      */
     public static function fromArray(
         array   $data,
         ?string $filename   = null,
         string  $delimiter  = ',',
         string  $enclosure  = '"',
-        ?string $customPath = null
+        string  $escape     = '\\',
+        ?string $customPath = null,
+        ?string $disk       = null
     ): string
     {
         self::resolveInstance();
 
-        return self::$instance::fromArray(
+        if (!is_null($customPath))
+        {
+            $filePath = $customPath;
+        } else
+        {
+            $filePath = $filename;
+            $filename = null;
+        }
+        return self::$instance->fromArray(
             $data,
-            $filename,
+            self::resolveSource($filePath, $filename, $disk),
             $delimiter,
             $enclosure,
-            $customPath
+            $escape
         );
     }
 
@@ -100,24 +129,77 @@ class Csv
      * Configure the correct integration for ICsv.
      *
      * @return void
+     * @throws InvalidConfigurationException
      */
     private static function resolveInstance(): void
     {
-        if (!isset(self::$instance)) {
-            $env = ConfigManager::get('env_config');
+        if (!isset(self::$instance))
+        {
+            self::resolveConfig();
+            $env = self::$config->get('env_config') ?? self::NATIVE_ENV;
 
             if (!in_array($env, self::ALLOWED_ENV_CONFIG))
             {
-                throw new LogicException(LanguageManager::getMessage('errors.illegal_env'));
+                throw new InvalidConfigurationException(self::$language->getMessage('errors.illegal_env'));
             }
 
-            if ($env === self::LARAVEL_ENV && class_exists('Illuminate\Support\Facades\Storage')) {
-                self::$instance = new LaravelCsv();
-            } elseif ($env === self::SYMFONY_ENV && class_exists('Symfony\Component\Filesystem\Filesystem')) {
-                self::$instance = new SymfonyCsv();
-            } else {
-                self::$instance = new NativeCsv();
+            if ($env === self::LARAVEL_ENV && class_exists('Illuminate\Support\Facades\Storage'))
+            {
+                self::$instance = new LaravelCsv(self::$language);
+            } elseif ($env === self::SYMFONY_ENV && class_exists('Symfony\Component\Filesystem\Filesystem'))
+            {
+                @trigger_error(
+                    'Support for the Symfony environment is deprecated; use the Laravel or Native environment instead.',
+                    E_USER_DEPRECATED
+                );
+                self::$instance = new SymfonyCsv(self::$language);
+            } else
+            {
+                self::$instance = new NativeCsv(self::$language);
             }
         }
+
+        if (!isset(self::$instance))
+        {
+            throw new InvalidConfigurationException(self::$language->getMessage('errors.illegal_env'));
+        }
+    }
+
+    /**
+     * Configure the correct language and config for this facade.
+     *
+     * @return void
+     */
+    private static function resolveConfig(): void
+    {
+        $config = file_exists(self::CUSTOM_CONFIG_PATH)
+            ? require self::CUSTOM_CONFIG_PATH
+            : require self::DEFAULT_CONFIG_PATH;
+
+        self::$config   = new ConfigManager($config);
+        self::$language = new LanguageManager(self::$config);
+    }
+
+    /**
+     * Detects and builds the correct source type based on environment and input.
+     *
+     * @param string        $filePath
+     * @param string|null   $filename
+     * @param string|null   $disk
+     * @return ISource
+     */
+    private static function resolveSource(string $filePath, ?string $filename = null, ?string $disk = null): ISource
+    {
+        if ($filePath === StdinSource::DEFAULT_STDIN_PATH)
+        {
+            return new StdinSource(self::$language, $filename, $disk);
+        }
+
+        if (preg_match(self::UNTRUSTED_PATH_REGEX, $filePath))
+        {
+            return new UntrustedSource(self::$config, self::$language, $filePath, $filename, $disk);
+        }
+
+        return new TrustedFylesystemSource(self::$config, self::$language, $filePath, $filename, $disk);
     }
 }

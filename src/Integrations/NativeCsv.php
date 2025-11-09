@@ -2,65 +2,52 @@
 
 namespace CsvManager\Integrations;
 
-use CsvManager\Core\ConfigManager;
-use LogicException;
+use CsvManager\Contracts\ISource;
 use CsvManager\Core\BaseCsv;
-use CsvManager\Core\LanguageManager;
 use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
 
-class NativeCsv extends BaseCsv
+final class NativeCsv extends BaseCsv
 {
     /**
      * A function that generates a CSV file from an array.
      *
-     * @param array         $data
-     * @param string|null   $filename
-     * @param string        $delimiter
-     * @param string        $enclosure
-     * @param string|null   $path
-     * @param string|null   $disk
+     * @param array     $data
+     * @param ISource   $source
+     * @param string    $delimiter
+     * @param string    $enclosure
+     * @param string    $escape
      * @return string
      * @throws CorruptedFileException
      * @throws NotFoundFileException
      */
-    public static function fromArray(
+    public function fromArray(
         array   $data,
-        ?string $filename   = null,
+        ISource $source,
         string  $delimiter  = ',',
         string  $enclosure  = '"',
-        ?string $path       = null,
-        ?string $disk       = null
+        string  $escape     = '\\'
     ): string
     {
-        self::validateCsvChars($delimiter, $enclosure, '\\');
-        // In native php projects $filename must be the fullPath.
-        if (is_null($filename)) {
-            throw new NotFoundFileException();
-        }
+        $this->validateCsvChars($delimiter, $enclosure, $escape);
 
-        // In native php projects $customPath always be null.
-        if (!is_null($path) || !is_null($disk)) {
-            throw new LogicException(LanguageManager::getMessage('errors.native_logic'));
-        }
-
-        // Must sanitize the value of filename.
-        $filename = self::sanitizeFilePath($filename);
+        $source->validate(false);
 
         // Open to write the file.
-        $file = fopen($filename, 'w');
+        $file = fopen($source->getFullPath(), 'w');
 
         // Write the data on file.
         foreach ($data as $row) {
             fputcsv(
                 $file,
-                self::arrayFlattenAndNormalize($row),
+                self::arrayFlattenAndNormalize($row, self::NOT_ALLOWED_CHARACTERS),
                 $delimiter,
-                $enclosure
+                $enclosure,
+                $escape
             );
         }
 
         fclose($file);
-        return $filename;
+        return $source->getFullPath();
     }
 }

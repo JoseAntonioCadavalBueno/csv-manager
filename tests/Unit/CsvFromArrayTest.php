@@ -163,6 +163,7 @@ class CsvFromArrayTest extends TestCase
         {
             Csv::fromArray(
                 data: [],
+                filename: self::CSV_TEST_PATH . 'native_php.txt',
                 delimiter: 'à'
             );
         } catch (InvalidArgumentException $exception)
@@ -182,6 +183,7 @@ class CsvFromArrayTest extends TestCase
         {
             Csv::fromArray(
                 data: [],
+                filename: self::CSV_TEST_PATH . 'native_php.txt',
                 delimiter: '\r'
             );
         } catch (InvalidArgumentException $exception)
@@ -201,6 +203,7 @@ class CsvFromArrayTest extends TestCase
         {
             Csv::fromArray(
                 data: [],
+                filename: self::CSV_TEST_PATH . 'native_php.txt',
                 delimiter: '\n'
             );
         } catch (InvalidArgumentException $exception)
@@ -220,6 +223,7 @@ class CsvFromArrayTest extends TestCase
         {
             Csv::fromArray(
                 data: [],
+                filename: self::CSV_TEST_PATH . 'native_php.txt',
                 enclosure: 'à'
             );
         } catch (InvalidArgumentException $exception)
@@ -239,6 +243,7 @@ class CsvFromArrayTest extends TestCase
         {
             Csv::fromArray(
                 data: [],
+                filename: self::CSV_TEST_PATH . 'native_php.txt',
                 delimiter: '\\',
                 enclosure: '\\',
             );

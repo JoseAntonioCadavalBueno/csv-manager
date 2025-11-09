@@ -2,6 +2,7 @@
 
 namespace tests\Unit;
 
+use CsvManager\Core\ConfigManager;
 use CsvManager\Core\LanguageManager;
 use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
@@ -71,6 +72,8 @@ class CsvToArrayTest extends TestCase
     /* TEST CONFIGURATION */
     /* ****************** */
 
+    private LanguageManager $language;
+
     public function setUp(): void
     {
         // Generate csv and txt files for tests.
@@ -81,6 +84,12 @@ class CsvToArrayTest extends TestCase
         $this->generateCsv(self::EMPTY_CSV, 0, 0);
         $this->generateCsv(self::EMPTY_TXT, 0, 0);
 
+        $config = file_exists(CSV::CUSTOM_CONFIG_PATH)
+            ? require CSV::CUSTOM_CONFIG_PATH
+            : require CSV::DEFAULT_CONFIG_PATH;
+
+        $config   = new ConfigManager($config);
+        $this->language = new LanguageManager($config);
     }
 
     public function tearDown(): void
@@ -228,7 +237,7 @@ class CsvToArrayTest extends TestCase
             $result = Csv::toArray(realpath(self::BIGGER_CSV));
         } catch (OverflowException $exception) {
             $this->assertEquals(500, $exception->getCode());
-            $this->assertEquals(LanguageManager::getMessage('errors.overflow'), $exception->getMessage());
+            $this->assertEquals($this->language->getMessage('errors.overflow'), $exception->getMessage());
         }
     }
 
@@ -243,7 +252,7 @@ class CsvToArrayTest extends TestCase
             $result = Csv::toArray(realpath(self::BIGGER_TXT));
         } catch (OverflowException $exception) {
             $this->assertEquals(500, $exception->getCode());
-            $this->assertEquals(LanguageManager::getMessage('errors.overflow'), $exception->getMessage());
+            $this->assertEquals($this->language->getMessage('errors.overflow'), $exception->getMessage());
         }
     }
 
@@ -294,7 +303,7 @@ class CsvToArrayTest extends TestCase
             $result = Csv::toArray(realpath(self::CSV_TEST_PATH) . DIRECTORY_SEPARATOR . 'LollipopStreetFakeNumber.csv');
         } catch (NotFoundFileException $exception) {
             $this->assertEquals(404, $exception->getCode());
-            $this->assertEquals(LanguageManager::getMessage('errors.not_found'), $exception->getMessage());
+            $this->assertEquals($this->language->getMessage('errors.not_found'), $exception->getMessage());
         }
     }
 
@@ -307,16 +316,12 @@ class CsvToArrayTest extends TestCase
     {
         foreach (self::MALICIOUS_INPUTS as $maliciousInput) {
             try {
-                $result = Csv::toArray(realpath(self::CSV_TEST_PATH) . DIRECTORY_SEPARATOR . $maliciousInput);
+                $result = Csv::toArray(realpath(self::CSV_TEST_PATH)
+                    . DIRECTORY_SEPARATOR . '..;' . DIRECTORY_SEPARATOR
+                    . '..' . DIRECTORY_SEPARATOR . $maliciousInput);
             } catch (CorruptedFileException $exception) {
                 $this->assertEquals(415, $exception->getCode());
-                if($maliciousInput === 'php://input')
-                {
-                    $this->assertEquals(LanguageManager::getMessage('errors.corrupt_2'), $exception->getMessage());
-                } else
-                {
-                    $this->assertEquals(LanguageManager::getMessage('errors.corrupt'), $exception->getMessage());
-                }
+                $this->assertEquals($this->language->getMessage('errors.corrupt'), $exception->getMessage());
             }
         }
     }
@@ -335,7 +340,7 @@ class CsvToArrayTest extends TestCase
             $result = Csv::toArray($filePath);
         } catch (CorruptedFileException $exception) {
             $this->assertEquals(415, $exception->getCode());
-            $this->assertEquals(LanguageManager::getMessage('errors.corrupt_2'), $exception->getMessage());
+            $this->assertEquals($this->language->getMessage('errors.corrupt_2'), $exception->getMessage());
         }
     }
 
