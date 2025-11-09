@@ -4,32 +4,21 @@ namespace CsvManager\Core;
 
 class ConfigManager
 {
-    private static ?array $config = null;
+    protected array $config;
 
-    const BASE_PATH = __DIR__ . DIRECTORY_SEPARATOR . '..'
-    . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
-
-    const DEFAULT_CONFIG_PATH   = self::BASE_PATH . 'config' . DIRECTORY_SEPARATOR . 'csv-manager.php';
-    const CUSTOM_CONFIG_PATH    = self::BASE_PATH . '..'
-    . DIRECTORY_SEPARATOR . '..'
-    . DIRECTORY_SEPARATOR . 'config'
-    . DIRECTORY_SEPARATOR . 'csv-manager.php';
+    public function __construct(array $config = [])
+    {
+        $this->config = $config;
+    }
 
     /**
      * Get the whole config array
      *
      * @return array
      */
-    public static function getConfig(): array
+    public function getConfig(): array
     {
-        if (is_null(self::$config))
-        {
-            self::$config = file_exists(self::CUSTOM_CONFIG_PATH)
-                ? require self::CUSTOM_CONFIG_PATH
-                : require self::DEFAULT_CONFIG_PATH;
-        }
-
-        return self::$config;
+        return $this->config;
     }
 
     /**
@@ -39,8 +28,18 @@ class ConfigManager
      * @param mixed|null    $default
      * @return mixed
      */
-    public static function get(string $key, mixed $default = null): mixed
+    public function get(string $key, mixed $default = null): mixed
     {
-        return self::getConfig()[$key] ?? $default;
+        $value = $this->config[$key] ?? $default;
+        // For retro-compatibility with ver. 1.2.0
+        if ($key === 'allowed_extensions' && is_string($value))
+        {
+            @trigger_error(
+                'Passing "allowed_extensions" as a string is deprecated; pass it as an array instead.',
+                E_USER_DEPRECATED
+            );
+            $value = array_map('trim', explode(',', $value));
+        }
+        return $value;
     }
 }

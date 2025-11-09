@@ -2,63 +2,58 @@
 
 namespace CsvManager\Integrations;
 
+use CsvManager\Contracts\ISource;
 use CsvManager\Core\BaseCsv;
-use CsvManager\Core\ConfigManager;
 use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
 use Illuminate\Support\Facades\Storage;
 
-class LaravelCsv extends BaseCsv
+final class LaravelCsv extends BaseCsv
 {
-    const PUBLIC_PATH   = 'app/public/';
     const STORAGE_PATH  = 'public';
 
     /**
      * A function that generates a CSV file from an array.
      *
-     * @param array         $data
-     * @param string|null   $filename
-     * @param string        $delimiter
-     * @param string        $enclosure
-     * @param string|null   $path
-     * @param string|null   $disk
+     * @param array     $data
+     * @param ISource   $source
+     * @param string    $delimiter
+     * @param string    $enclosure
+     * @param string    $escape
      * @return string
      * @throws CorruptedFileException|NotFoundFileException
      */
-    public static function fromArray(
+    public function fromArray(
         array   $data,
-        ?string $filename   = null,
+        ISource $source,
         string  $delimiter  = ',',
         string  $enclosure  = '"',
-        ?string $path       = null,
-        ?string $disk       = null
+        string  $escape     = '\\'
     ): string
     {
-        self::validateCsvChars($delimiter, $enclosure, '\\');
-        $filename   = self::generateFileName($filename);
-        $disk       = $disk ?? self::STORAGE_PATH;
+        $this->validateCsvChars($delimiter, $enclosure, $escape);
 
-        $relativePath = !is_null($path)
-            ? self::sanitizeFilePath($path . DIRECTORY_SEPARATOR . $filename)
-            : $filename;
+        $source->validate(false);
 
-        $dir = dirname(Storage::disk($disk)->path($relativePath));
-        if (!is_dir($dir))
-        {
-            throw new NotFoundFileException(ConfigManager::get('errors.not_found_2'));
-        }
+        // Create a temporal stream on memory.
+        $stream = fopen('php://temp', 'r+');
 
-        $csvContent = '';
         foreach ($data as $row)
         {
-            $normalizedRow = self::arrayFlattenAndNormalize($row);
-            $csvContent .= $enclosure . implode($delimiter, $normalizedRow) . $enclosure . "\n";
+            fputcsv(
+                $stream,
+                self::arrayFlattenAndNormalize($row, self::NOT_ALLOWED_CHARACTERS),
+                $delimiter,
+                $enclosure,
+                $escape
+            );
         }
 
-        // Save the CSV
-        Storage::disk($relativePath)->put($filename, $csvContent);
+        rewind($stream);
+        $csvContent = stream_get_contents($stream);
+        $disk = $source->getDisk() ?? self::STORAGE_PATH;
 
-        // Return the path of the generated file.
-        return Storage::disk($disk)->path($relativePath);
+        Storage::disk($disk)->put($source->getFullPath(), $csvContent);
+        return Storage::disk($disk)->path($source->getFullPath());
     }
 }

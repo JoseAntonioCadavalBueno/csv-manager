@@ -1,6 +1,6 @@
 {
   "name": "atomsk/csv-manager",
-  "version": "v1.2.0",
+  "version": "v1.3.0",
   "description": "PHP library for efficient management of large CSV files.",
   "type": "library",
   "license": "MIT",
@@ -12,6 +12,10 @@
   ],
   "require": {
     "php": ">=8.0"
+  },
+  "suggest": {
+    "illuminate/filesystem": "Required only if you plan to use LaravelCsv integration.",
+    "symfony/filesystem": "Required only if you plan to use SymfonyCsv integration."
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5"

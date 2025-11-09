@@ -2,64 +2,52 @@
 
 namespace CsvManager\Integrations;
 
+use CsvManager\Contracts\ISource;
 use CsvManager\Core\BaseCsv;
-use CsvManager\Core\ConfigManager;
-use CsvManager\Core\LanguageManager;
 use CsvManager\Exceptions\CorruptedFileException;
-use LogicException;
+use CsvManager\Exceptions\NotFoundFileException;
 use SplFileObject;
 use Symfony\Component\Filesystem\Filesystem;
 
-class SymfonyCsv extends BaseCsv
+final class SymfonyCsv extends BaseCsv
 {
-    const SYMFONY_DIR = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR;
-
     /**
      * A function that generates a CSV file from an array.
      *
-     * @param array         $data
-     * @param string|null   $filename
-     * @param string        $delimiter
-     * @param string        $enclosure
-     * @param string|null   $path
-     * @param string|null   $disk
+     * @param array $data
+     * @param ISource $source
+     * @param string $delimiter
+     * @param string $enclosure
+     * @param string $escape
      * @return string
-     * @throws CorruptedFileException
+     * @throws CorruptedFileException|NotFoundFileException
      */
-    public static function fromArray(
+    public function fromArray(
         array   $data,
-        ?string $filename   = null,
+        ISource $source,
         string  $delimiter  = ',',
         string  $enclosure  = '"',
-        ?string $path       = null,
-        ?string $disk       = null
+        string  $escape     = '\\'
     ): string
     {
-        self::validateCsvChars($delimiter, $enclosure, '\\');
-        $filename = self::generateFileName($filename);
+        $this->validateCsvChars($delimiter, $enclosure, $escape);
 
-        if (!is_null($disk))
-        {
-           throw new LogicException(LanguageManager::getMessage('errors.symfony_logic'));
-        }
-
-        $relativePath = !is_null($path)
-            ? self::sanitizeFileName($path . DIRECTORY_SEPARATOR . $filename)
-            : self::SYMFONY_DIR . $filename;
+        $source->validate(false);
 
         $filesystem = new Filesystem();
-        $filesystem->mkdir(dirname($relativePath));
+        $filesystem->mkdir($source->getPath());
 
-        $file = new SplFileObject($relativePath, 'w');
+        $file = new SplFileObject($source->getFullPath(), 'w');
 
         foreach ($data as $row) {
             $file->fputcsv(
-                self::arrayFlattenAndNormalize($row),
+                self::arrayFlattenAndNormalize($row, self::NOT_ALLOWED_CHARACTERS),
                 $delimiter,
-                $enclosure
+                $enclosure,
+                $escape
             );
         }
 
-        return $relativePath;
+        return $source->getFullPath();
     }
 }
