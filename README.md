@@ -3,6 +3,7 @@
 ![Pipeline Status](https://gitlab.com/jcadavalbueno/csv-manager/badges/main/pipeline.svg)
 ![Downloads](https://img.shields.io/packagist/dt/atomsk/csv-manager)
 ![Latest Version](https://img.shields.io/packagist/v/atomsk/csv-manager)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FJoseAntonioCadavalBueno%2Fcsv-manager.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FJoseAntonioCadavalBueno%2Fcsv-manager?ref=badge_shield)
 
 
 PHP library for efficient management of large CSV files. Designed for projects in Laravel, Symfony, or native PHP, with a simple and customizable interface.
@@ -238,3 +239,6 @@ $csv->fromArray([['foo' => 'bar']], $source);
 
 ## 🪪 License
 MIT - Open source, free to use and modify.
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FJoseAntonioCadavalBueno%2Fcsv-manager.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FJoseAntonioCadavalBueno%2Fcsv-manager?ref=badge_large)
