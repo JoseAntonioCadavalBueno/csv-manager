@@ -2,15 +2,19 @@
 
 namespace CsvManager\Core;
 
+use CsvManager\Contracts\IDriver;
 use CsvManager\Contracts\ISource;
+use CsvManager\Drivers\LegacyDriver;
 use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
 use CsvManager\Exceptions\OverflowException;
 use CsvManager\Contracts\ICsv;
+use CsvManager\Facades\Csv;
 use CsvManager\Traits\CsvValidator;
 use InvalidArgumentException;
+use JsonException;
 use LogicException;
-use Throwable;
+use src\Drivers\StandardDriver;
 
 abstract class BaseCsv implements ICsv
 {
@@ -18,12 +22,34 @@ abstract class BaseCsv implements ICsv
 
     const NOT_ALLOWED_CHARACTERS = ["\n", "\r"];
 
-    protected LanguageManager $language;
+    protected Language  $language;
+    protected Config    $config;
+    protected IDriver   $driver;
     protected MemoryInspector $memoryInspector;
-    public function __construct(LanguageManager $language)
+    public function __construct(Language $language, ?Config $config = null)
     {
         $this->language         = $language;
         $this->memoryInspector  = self::instanceMemoryInspector();
+
+        if (is_null($config))
+        {
+            $configData = file_exists(Csv::CUSTOM_CONFIG_PATH)
+                ? require Csv::CUSTOM_CONFIG_PATH
+                : require Csv::DEFAULT_CONFIG_PATH;
+
+            $this->config = new Config($configData);
+        } else
+        {
+            $this->config = $config;
+        }
+
+        if ($this->config->get('legacy_mode'))
+        {
+            $this->driver = new LegacyDriver($this->language);
+        } else
+        {
+            $this->driver = new StandardDriver();
+        }
     }
 
     /* **************** */
@@ -48,6 +74,33 @@ abstract class BaseCsv implements ICsv
         string  $delimiter  = ',',
         string  $enclosure  = '"',
         string  $escape     = '\\'
+    ): string;
+
+    /**
+     * A function that generate a CSV file from a json.
+     *
+     * @param string    $data
+     * @param ISource   $source
+     * @param string    $delimiter
+     * @param string    $enclosure
+     * @param string    $escape
+     * @param bool      $associative
+     * @param int       $depth
+     * @param int       $flags
+     * @return string
+     * @throws CorruptedFileException
+     * @throws NotFoundFileException
+     * @throws JsonException
+     */
+    abstract public function fromJson(
+        string  $data,
+        ISource $source,
+        string  $delimiter      = ',',
+        string  $enclosure      = '"',
+        string  $escape         = '\\',
+        bool    $associative    = false,
+        int     $depth          = 512,
+        int     $flags          = 0
     ): string;
 
     /**
@@ -77,18 +130,48 @@ abstract class BaseCsv implements ICsv
 
         $source->validate();
 
-        try
+        // If is necessary have callable and is not included,
+        // return a OverflowException because we cannot process the file.
+        if ($this->memoryInspector->fileSizeExceedsMemoryLimit($source->getFullPath()) && is_null($function))
         {
-            $file = fopen($source->getFullPath(), 'r');
-        } catch (Throwable $exception)
-        {
-            // If the file cannot be opened, return a CorruptedFileException.
-            throw new CorruptedFileException(message: $this->language->getMessage('errors.corrupt'), previous: $exception);
+            throw new OverflowException($this->language->getMessage('errors.overflow'));
         }
 
-        $data = [];
-        // Shared read lock.
-        flock($file, LOCK_SH);
+        return $this->driver->to($source, $header, $function, $length, $delimiter, $enclosure, $escape);
+    }
+
+    /**
+     * A function that processes a csv file and converts it into a json.
+     *
+     * @param ISource       $source
+     * @param bool          $header
+     * @param callable|null $function
+     * @param int|null      $length
+     * @param string        $delimiter
+     * @param string        $enclosure
+     * @param string        $escape
+     * @param int           $flags
+     * @return string|bool
+     *
+     * @throws CorruptedFileException
+     * @throws JsonException
+     * @throws NotFoundFileException
+     * @throws OverflowException
+     */
+    public function toJson(
+        ISource     $source,
+        bool        $header     = false,
+        ?callable   $function   = null,
+        ?int        $length     = null,
+        string      $delimiter  = ',',
+        string      $enclosure  = '"',
+        string      $escape     = '\\',
+        int         $flags      = JSON_PRETTY_PRINT
+    ): string|bool
+    {
+        self::validateCsvChars($delimiter, $enclosure, $escape);
+
+        $source->validate();
 
         // If is necessary have callable and is not included,
         // return a OverflowException because we cannot process the file.
@@ -97,29 +180,10 @@ abstract class BaseCsv implements ICsv
             throw new OverflowException($this->language->getMessage('errors.overflow'));
         }
 
-        while (($row = fgetcsv($file, $length, $delimiter, $enclosure, $escape)) !== false)
-        {
-            // If header is true, jump to the next row.
-            if ($header)
-            {
-                $header = false;
-                continue;
-            }
-
-            if (!is_null($function))
-            {
-                $function($row);
-            } else
-            {
-                $data[] = $row;
-            }
-        }
-
-        // Release shared read lock and close the file.
-        flock($file, LOCK_UN);
-        fclose($file);
-
-        return empty($data) && !is_null($function) ? true : $data;
+        return json_encode(
+            $this->driver->to($source, $header, $function, $length, $delimiter, $enclosure, $escape),
+            $flags|JSON_THROW_ON_ERROR
+        );
     }
 
     /* *************************** */

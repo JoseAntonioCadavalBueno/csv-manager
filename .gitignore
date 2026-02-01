@@ -8,3 +8,4 @@ resources/test-csv/*
 .phpunit.result.cache
 php-test-framework.xml
 .idea
+.output.txt

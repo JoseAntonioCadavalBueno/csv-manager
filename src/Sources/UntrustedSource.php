@@ -3,8 +3,8 @@
 namespace CsvManager\Sources;
 
 use CsvManager\Contracts\ISource;
-use CsvManager\Core\ConfigManager;
-use CsvManager\Core\LanguageManager;
+use CsvManager\Core\Config;
+use CsvManager\Core\Language;
 use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
 use CsvManager\Traits\SourceValidator;
@@ -15,14 +15,14 @@ class UntrustedSource implements ISource
 
     const PATH_SANITIZE_REGEX = '/^[\p{L}\p{N}\.\-_ :\/\\\\]+$/u';
 
-    protected ConfigManager $config;
-    protected LanguageManager $language;
+    protected Config $config;
+    protected Language $language;
 
     private string  $filePath;
     private string  $filename;
     private ?string $disk;
 
-    public function __construct(ConfigManager $config, LanguageManager $language, string $filePath, ?string $filename = null, ?string $disk = null)
+    public function __construct(Config $config, Language $language, string $filePath, ?string $filename = null, ?string $disk = null)
     {
         $this->config   = $config;
         $this->language = $language;

@@ -2,9 +2,19 @@
 
 namespace CsvManager\Core;
 
+use CsvManager\Models\CsvFile;
+use CsvManager\Traits\Operators;
+
 class MemoryInspector
 {
+    use Operators;
     const MEMORY_LIMIT_PERCENT  = 0.8;
+
+    const MAP_STORAGE_UNITS = [
+        'k' => CsvFile::KB,
+        'm' => CsvFile::MB,
+        'g' => CsvFile::GB
+    ];
 
     /**
      * Boolean function that determines if the file size
@@ -50,20 +60,14 @@ class MemoryInspector
      * Returns always in bytes.
      *
      * @param string $value
-     * @return int
+     * @return float
      */
-    protected static function convertToBytes(string $value): int
+    protected static function convertToBytes(string $value): float
     {
         $value = trim($value);
         $unit  = strtolower(substr($value, -1));
-        $bytes = (int) $value;
+        $bytes = (float) $value;
 
-        return match($unit)
-        {
-            'g' => $bytes * 1024 * 1024 * 1024,
-            'm' => $bytes * 1024 * 1024,
-            'k' => $bytes * 1024,
-            default => $bytes
-        };
+        return self::convertStorageUnit($bytes, self::MAP_STORAGE_UNITS[$unit], CsvFile::B);
     }
 }

@@ -2,44 +2,10 @@
 
 namespace CsvManager\Core;
 
-class ConfigManager
+@trigger_error(
+    'Using CsvManager\Core\ConfigManager is deprecated. Use CsvMananger\Core\Config instead.',
+    E_USER_DEPRECATED
+);
+class ConfigManager extends Config
 {
-    protected array $config;
-
-    public function __construct(array $config = [])
-    {
-        $this->config = $config;
-    }
-
-    /**
-     * Get the whole config array
-     *
-     * @return array
-     */
-    public function getConfig(): array
-    {
-        return $this->config;
-    }
-
-    /**
-     * Get a single config value.
-     *
-     * @param string        $key
-     * @param mixed|null    $default
-     * @return mixed
-     */
-    public function get(string $key, mixed $default = null): mixed
-    {
-        $value = $this->config[$key] ?? $default;
-        // For retro-compatibility with ver. 1.2.0
-        if ($key === 'allowed_extensions' && is_string($value))
-        {
-            @trigger_error(
-                'Passing "allowed_extensions" as a string is deprecated; pass it as an array instead.',
-                E_USER_DEPRECATED
-            );
-            $value = array_map('trim', explode(',', $value));
-        }
-        return $value;
-    }
 }

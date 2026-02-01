@@ -3,6 +3,14 @@
 return [
 
     /*
+    | Define if use the legacy mode or not
+    | --------------------------------------------------------------
+    | By default legacy_mode is enabled.
+    */
+
+    'legacy_mode' => true,
+
+    /*
     | Define the environment config.
     | --------------------------------------------------------------
     | You can define a native, laravel or symfony environment config.
