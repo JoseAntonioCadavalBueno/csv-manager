@@ -1,19 +1,28 @@
 # 📦 CSV Manager
-![PHP](https://img.shields.io/badge/PHP-8.0%2B-blue)
+![PHP](https://img.shields.io/badge/PHP-8.1%2B-blue)
 ![Pipeline Status](https://gitlab.com/jcadavalbueno/csv-manager/badges/main/pipeline.svg)
 ![Downloads](https://img.shields.io/packagist/dt/atomsk/csv-manager)
 ![Latest Version](https://img.shields.io/packagist/v/atomsk/csv-manager)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FJoseAntonioCadavalBueno%2Fcsv-manager.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FJoseAntonioCadavalBueno%2Fcsv-manager?ref=badge_shield)
 
 
 PHP library for efficient management of large CSV files. Designed for projects in Laravel, Symfony, or native PHP, with a simple and customizable interface.
 
+## 📊 Compatibility Matrix
+| Library Version  | PHP Version   | Laravel Support | Symfony Support | Status |
+|:-----------------|:--------------| :--- | :--- | :--- |
+| **v1.4.x**       | `8.1+`        | Yes | Deprecated | **Current** |
+| **v1.3.x**       | `8.0+`        | Yes | Yes | Maintenance |
+| **v1.2.x**       | `8.0+`        | Yes | Yes | Legacy |
+| **v1.1.x**       | `8.0+`        | Yes | Yes | Legacy |
+| **v1.0.x**       | `8.0+`        | Yes | Yes | Legacy |
 > ## ⚠️ Deprecated Features
-> 
+>
 > Some features and configurations have been deprecated and will be removed in future versions.
 > Please update your code accordingly to ensure compatibility.
-> 
+>
 > ### 1. Allowed_extensions as a string:
-> 
+>
 > Starting from version 1.3, the `allowed_extensions` variable in the `csv-manager.php` configuration file must now be defined as an array instead of a string.
 >
 > **old (Deprecated):**
@@ -21,42 +30,42 @@ PHP library for efficient management of large CSV files. Designed for projects i
 > ```php
 > 'allowed_extensions' => 'csv,txt'
 > ```
-> 
+>
 > **New (recommended):**
-> 
+>
 > ```php
 > 'allowed_extensions' => ['csv', 'txt']
 > ```
-> 
+>
 > ### 2. Using CsvManager\Csv facade:
-> 
-> Starting from version 1.1, the namespace of the `Csv` facade has changed.  
+>
+> Starting from version 1.1, the namespace of the `Csv` facade has changed.
 >
 > **old (Deprecated):**
 >
 > ```php
 > use CsvManager\Csv;
 > ```
-> 
+>
 > **New (recommended):**
 >
 > ```php
 > use CsvManager\Facades\Csv;
 > ```
-> 
+>
 > ### 3. Symfony environment support:
-> 
+>
 > Starting from the version 1.3, support for the symfony environment has been deprecated.
 > This is because the `SymfonyCsv.php` and `NativeCsv.php` integration are very similar and will be merged in future versions.
-> 
+>
 > **Old (Deprecated):**
 >
 > ```php
 > 'env_config' => 'symfony'
 > ```
-> 
+>
 > **New (recommended):**
-> 
+>
 > ```php
 > 'env_config' => 'native' // or 'laravel' if you prefer
 > ```
@@ -234,7 +243,16 @@ $source = new TrustedFylesystemSource($config, $language, __DIR__, 'example.csv'
 $csv->fromArray([['foo' => 'bar']], $source);
 ```
 
-> Works with PHP **8.0**, **8.1**, **8.2**, **8.3** and **8.4**
+> Works with PHP **8.1**, **8.2**, **8.3** and **8.4**
+
+## 🤖 AI & Automation Guidelines
+This repository defines guidelines for AI-assisted work. First, read `AI.md` (single source of truth):
+
+- Universal guide (humans + AIs): [AI.md](./AI.md)
+- Adapter for Junie: [.junie/guidelines.md](./.junie/guidelines.md)
 
 ## 🪪 License
 MIT - Open source, free to use and modify.
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FJoseAntonioCadavalBueno%2Fcsv-manager.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FJoseAntonioCadavalBueno%2Fcsv-manager?ref=badge_large)

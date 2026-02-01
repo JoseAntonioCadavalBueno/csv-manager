@@ -4,8 +4,8 @@ namespace CsvManager\Facades;
 
 use CsvManager\Contracts\ICsv;
 use CsvManager\Contracts\ISource;
-use CsvManager\Core\ConfigManager;
-use CsvManager\Core\LanguageManager;
+use CsvManager\Core\Config;
+use CsvManager\Core\Language;
 use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Exceptions\NotFoundFileException;
 use CsvManager\Exceptions\OverflowException;
@@ -15,6 +15,7 @@ use CsvManager\Integrations\SymfonyCsv;
 use CsvManager\Sources\StdinSource;
 use CsvManager\Sources\TrustedFylesystemSource;
 use CsvManager\Sources\UntrustedSource;
+use JsonException;
 use src\Exceptions\InvalidConfigurationException;
 
 class Csv
@@ -36,8 +37,8 @@ class Csv
     const UNTRUSTED_PATH_REGEX = '/\.\.|[<>:"|?*]/';
 
     private static ICsv $instance;
-    private static ConfigManager $config;
-    private static LanguageManager $language;
+    private static Config $config;
+    private static Language $language;
 
     /* **************** */
     /* PUBLIC FUNCTIONS */
@@ -80,6 +81,50 @@ class Csv
     }
 
     /**
+     * A function that processes a csv file and converts it into a json.
+     *
+     * @param string        $filePath
+     * @param bool          $header
+     * @param callable|null $function
+     * @param int|null      $length
+     * @param string        $delimiter
+     * @param string        $enclosure
+     * @param string        $escape
+     * @param int           $flags
+     * @return string|bool
+     *
+     * @throws CorruptedFileException
+     * @throws JsonException
+     * @throws NotFoundFileException
+     * @throws OverflowException
+     * @throws InvalidConfigurationException
+     */
+    public static function toJson(
+        string      $filePath,
+        bool        $header     = false,
+        ?callable   $function   = null,
+        ?int        $length     = null,
+        string      $delimiter  = ',',
+        string      $enclosure  = '"',
+        string      $escape     = '\\',
+        int         $flags      = 0
+    ): string|bool
+    {
+        self::resolveInstance();
+
+        return self::$instance->toJson(
+            self::resolveSource($filePath),
+            $header,
+            $function,
+            $length,
+            $delimiter,
+            $enclosure,
+            $escape,
+            $flags
+        );
+    }
+
+    /**
      * A function that generates a CSV file from an array.
      *
      * @param array         $data
@@ -118,6 +163,58 @@ class Csv
             $delimiter,
             $enclosure,
             $escape
+        );
+    }
+
+    /**
+     * A function that generate a CSV file from a json.
+     *
+     * @param string        $data
+     * @param string|null   $filename
+     * @param string        $delimiter
+     * @param string        $enclosure
+     * @param string        $escape
+     * @param bool          $associative
+     * @param int           $depth
+     * @param int           $flags
+     * @param string|null   $customPath
+     * @param string|null   $disk
+     * @return string
+     * @throws InvalidConfigurationException
+     */
+    public static function fromJson(
+        string  $data,
+        ?string $filename       = null,
+        string  $delimiter      = ',',
+        string  $enclosure      = '"',
+        string  $escape         = '\\',
+        bool    $associative    = false,
+        int     $depth          = 512,
+        int     $flags          = 0,
+        ?string $customPath     = null,
+        ?string $disk           = null
+    ): string
+    {
+        self::resolveInstance();
+
+        if (!is_null($customPath))
+        {
+            $filePath = $customPath;
+        } else
+        {
+            $filePath = $filename;
+            $filename = null;
+        }
+
+        return self::$instance->fromJson(
+            $data,
+            self::resolveSource($filePath, $filename, $disk),
+            $delimiter,
+            $enclosure,
+            $escape,
+            $associative,
+            $depth,
+            $flags
         );
     }
 
@@ -176,8 +273,8 @@ class Csv
             ? require self::CUSTOM_CONFIG_PATH
             : require self::DEFAULT_CONFIG_PATH;
 
-        self::$config   = new ConfigManager($config);
-        self::$language = new LanguageManager(self::$config);
+        self::$config   = new Config($config);
+        self::$language = new Language(self::$config);
     }
 
     /**

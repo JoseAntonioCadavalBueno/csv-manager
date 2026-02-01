@@ -6,3 +6,4 @@
 /.gitattributes
 /resources export-ignore
 /.idea export-ignore
+/phpbench.json export-ignore

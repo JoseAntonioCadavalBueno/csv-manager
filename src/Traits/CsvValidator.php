@@ -11,7 +11,7 @@ trait CsvValidator
      * @param array $notAllowedChars
      * @return array
      */
-    protected static function arrayFlattenAndNormalize(array $array, array $notAllowedChars): array
+    public static function arrayFlattenAndNormalize(array $array, array $notAllowedChars): array
     {
         $result = [];
         foreach ($array as $value)

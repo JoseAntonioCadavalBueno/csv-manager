@@ -3,7 +3,7 @@
 namespace CsvManager\Sources;
 
 use CsvManager\Contracts\ISource;
-use CsvManager\Core\LanguageManager;
+use CsvManager\Core\Language;
 use CsvManager\Exceptions\CorruptedFileException;
 use CsvManager\Traits\SourceValidator;
 
@@ -13,10 +13,10 @@ class StdinSource implements ISource
 
     const DEFAULT_STDIN_PATH = 'php://stdin';
 
-    protected LanguageManager $language;
+    protected Language $language;
     private ?string $filename;
     private ?string $disk;
-    public function __construct(LanguageManager $language, ?string $filename = null, ?string $disk = null)
+    public function __construct(Language $language, ?string $filename = null, ?string $disk = null)
     {
         $this->language = $language;
         $this->disk     = $disk;

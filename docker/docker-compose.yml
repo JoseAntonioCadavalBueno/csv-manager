@@ -8,13 +8,6 @@ services:
     volumes:
       - "../:/var/www/csv-manager"
 # Tests Containers.
-  csv-manager-8-0-test:
-    image: bigestionlab/atomsk-php:php-8.0
-    user: atomsk
-    working_dir: "/var/www/csv-manager"
-    command: sh -c "composer install && composer test"
-    volumes:
-      - "../:/var/www/csv-manager"
   csv-manager-8-1-test:
     image: bigestionlab/atomsk-php:php-8.1
     user: atomsk
@@ -37,7 +30,7 @@ services:
     volumes:
       - "../:/var/www/csv-manager"
   csv-manager-8-4-test:
-    image: bigestionlab/atomsk-php:php-8.3
+    image: bigestionlab/atomsk-php:php-8.4
     user: atomsk
     working_dir: "/var/www/csv-manager"
     command: sh -c "composer install && composer test"
